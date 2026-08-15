@@ -1,0 +1,45 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    expose:
+      - '3333'
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:3333/health/live']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_PUBLISHABLE_KEY: ${VITE_SUPABASE_PUBLISHABLE_KEY}
+        VITE_SENTRY_DSN: ${VITE_SENTRY_DSN:-}
+        VITE_SENTRY_RELEASE: ${VITE_SENTRY_RELEASE:-}
+        VITE_WHATSAPP_NUMBER: ${VITE_WHATSAPP_NUMBER}
+        VITE_INSTAGRAM_URL: ${VITE_INSTAGRAM_URL}
+    restart: unless-stopped
+    expose:
+      - '80'
+    depends_on:
+      api:
+        condition: service_healthy
+
+  uptime-kuma:
+    image: louislam/uptime-kuma:2
+    profiles: ['monitoring']
+    restart: unless-stopped
+    volumes:
+      - uptime-kuma-data:/app/data
+    expose:
+      - '3001'
+
+volumes:
+  uptime-kuma-data:

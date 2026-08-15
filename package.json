@@ -1,0 +1,35 @@
+{
+  "name": "juliana-manduca",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Portal institucional e área de clientes de Juliana Manduca.",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @juliana/contracts && npm run build -w @juliana/api && npm run build -w @juliana/web",
+    "dev": "npm run build -w @juliana/contracts && concurrently -n api,web -c magenta,cyan \"npm run dev -w @juliana/api\" \"npm run dev -w @juliana/web\"",
+    "lint": "eslint .",
+    "typecheck": "npm run build -w @juliana/contracts && npm run typecheck -w @juliana/api && npm run typecheck -w @juliana/web",
+    "test": "npm run build -w @juliana/contracts && npm run test -w @juliana/contracts && npm run test -w @juliana/api && npm run test -w @juliana/web",
+    "test:e2e": "playwright test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:generate": "npm run db:generate -w @juliana/api",
+    "db:migrate": "npm run db:migrate -w @juliana/api"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "@playwright/test": "1.62.1",
+    "concurrently": "9.2.4",
+    "eslint": "9.39.5",
+    "prettier": "3.9.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.67.0"
+  }
+}

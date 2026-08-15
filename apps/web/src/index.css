@@ -1,0 +1,136 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-ink-950: #0d0c16;
+  --color-ink-900: #151320;
+  --color-ink-800: #201c2d;
+  --color-plum-700: #3a203e;
+  --color-plum-500: #68416d;
+  --color-gold-500: #d7b46a;
+  --color-gold-300: #ead59c;
+  --color-ivory-100: #f7f1e5;
+  --color-ivory-200: #e9dfcf;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  font-family: var(--font-sans);
+  color: var(--color-ivory-100);
+  background: var(--color-ink-950);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #0d0c16;
+}
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold-500);
+  outline-offset: 3px;
+}
+
+.cosmic-bg {
+  background:
+    radial-gradient(circle at 12% 15%, rgba(104, 65, 109, 0.24), transparent 32rem),
+    radial-gradient(circle at 80% 5%, rgba(215, 180, 106, 0.08), transparent 24rem), #0d0c16;
+}
+
+.star-field {
+  background-image:
+    radial-gradient(circle, rgba(234, 213, 156, 0.55) 1px, transparent 1px),
+    radial-gradient(circle, rgba(247, 241, 229, 0.25) 1px, transparent 1px);
+  background-position:
+    0 0,
+    26px 38px;
+  background-size:
+    92px 92px,
+    137px 137px;
+  mask-image: linear-gradient(to bottom, black, transparent 78%);
+  opacity: 0.32;
+}
+
+.display {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+.eyebrow {
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: #d7b46a;
+}
+.panel {
+  border: 1px solid rgba(233, 223, 207, 0.12);
+  background: rgba(32, 28, 45, 0.62);
+}
+.muted {
+  color: rgba(247, 241, 229, 0.68);
+}
+.input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(233, 223, 207, 0.18);
+  background: rgba(13, 12, 22, 0.7);
+  color: #f7f1e5;
+  padding: 0.8rem 0.9rem;
+}
+.input::placeholder {
+  color: rgba(247, 241, 229, 0.4);
+}
+.label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  color: #e9dfcf;
+}
+.field-error {
+  margin-top: 0.35rem;
+  color: #f1a7a7;
+  font-size: 0.8rem;
+}
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+@media (max-width: 800px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}

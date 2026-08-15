@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main, 'codex/**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    env:
+      VITE_API_URL: http://127.0.0.1:3333
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: ci-publishable-key
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run db:check -w @juliana/api
+      - run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          VITE_API_URL: http://127.0.0.1:3333
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: local-publishable-key
