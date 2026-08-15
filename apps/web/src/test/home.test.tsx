@@ -16,5 +16,6 @@ describe('home page', () => {
       '/login',
     );
     expect(screen.getAllByText('Consulte valores')).toHaveLength(3);
+    expect(screen.queryByRole('img', { name: /Juliana Manduca/i })).not.toBeInTheDocument();
   });
 });

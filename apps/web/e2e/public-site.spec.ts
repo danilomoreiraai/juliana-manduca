@@ -6,6 +6,7 @@ test('public landing page and 404 are usable', async ({ page }) => {
   await expect(
     page.getByRole('link', { name: /área do cliente/i, includeHidden: true }).first(),
   ).toHaveAttribute('href', '/login');
+  await expect(page.locator('[src*="juliana-atlantic"]')).toHaveCount(0);
   await page.goto('/pagina-inexistente');
   await expect(page.getByRole('heading', { name: /constelação não existe/i })).toBeVisible();
 });
