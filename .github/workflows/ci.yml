@@ -12,6 +12,7 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     env:
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/juliana_ci
       VITE_API_URL: http://127.0.0.1:3333
       VITE_SUPABASE_URL: http://127.0.0.1:54321
       VITE_SUPABASE_PUBLISHABLE_KEY: ci-publishable-key
