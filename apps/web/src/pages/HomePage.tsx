@@ -28,12 +28,12 @@ export const HomePage = () => {
       <SiteHeader />
       <main>
         <section
-          className="relative min-h-[92vh] overflow-hidden px-5 pb-20 pt-32 lg:px-8"
+          className="relative min-h-[76vh] overflow-hidden px-5 pb-20 pt-32 lg:px-8"
           aria-labelledby="hero-title"
         >
           <div className="star-field absolute inset-0" aria-hidden="true" />
-          <div className="relative mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-[1.04fr_.96fr]">
-            <div className="max-w-3xl py-10">
+          <div className="relative mx-auto max-w-7xl">
+            <div className="max-w-4xl py-10">
               <p className="eyebrow mb-6">Astrologia consciente</p>
               <h1
                 id="hero-title"
@@ -71,20 +71,6 @@ export const HomePage = () => {
                 >
                   Sobre Juliana
                 </a>
-              </div>
-            </div>
-            <div className="relative mx-auto w-full max-w-lg">
-              <div
-                className="absolute -inset-5 rounded-[3rem] border border-gold-500/20"
-                aria-hidden="true"
-              />
-              <img
-                src="/juliana-atlantic.webp"
-                alt="Juliana Manduca em uma paisagem junto ao oceano"
-                className="relative aspect-[4/5] w-full rounded-[2.5rem] object-cover object-[53%_72%] shadow-2xl shadow-black/40"
-              />
-              <div className="panel absolute -bottom-7 -left-4 max-w-[15rem] rounded-2xl p-4 shadow-xl sm:-left-10">
-                <p className="display text-2xl text-gold-300">Presença antes da previsão.</p>
               </div>
             </div>
           </div>

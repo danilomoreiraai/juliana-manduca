@@ -1,0 +1,33 @@
+name: Tarefa de produto ou engenharia
+description: Planejar uma mudança rastreável antes da implementação
+title: '[Área] '
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Contexto e problema
+      description: Explique o problema e quem é afetado.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Escopo
+      description: Liste o que precisa mudar e o que fica de fora.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critérios de aceite
+      description: Use uma checklist observável e verificável.
+      value: '- [ ] '
+    validations:
+      required: true
+  - type: textarea
+    id: deploy
+    attributes:
+      label: Deploy, observabilidade e rollback
+      description: Descreva riscos, sinais de sucesso e como reverter.
+    validations:
+      required: true

@@ -24,6 +24,12 @@ packages/contracts   schemas Zod e tipos compartilhados
 docs                  implantação e operação
 ```
 
+## Fluxo de contribuição e deploy
+
+Todo trabalho material segue **issue → branch `codex/*` → PR → CI/revisão → merge → deploy**. Push direto na `main` não é permitido. A descrição do PR deve vincular a issue com `Closes #N` ou `Refs #N` e registrar validação, observabilidade, deploy e rollback.
+
+Agentes e automações devem ler [AGENTS.md](AGENTS.md) antes de alterar o projeto. Os templates em `.github/` formalizam esse padrão para issues e PRs.
+
 ## Desenvolvimento
 
 Requisitos: Node.js 20.19+ e npm 11+.
