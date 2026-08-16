@@ -180,7 +180,7 @@ export const DashboardPage = () => {
             <Button disabled={update.isPending} aria-busy={update.isPending}>
               {update.isPending ? <Spinner label="Salvando" /> : 'Salvar perfil'}
             </Button>
-            {message && <span className="text-sm text-green-200">{message}</span>}
+            {message && <span className="text-sm text-green-900">{message}</span>}
           </div>
         </form>
       </section>

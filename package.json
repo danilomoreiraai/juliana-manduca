@@ -23,6 +23,7 @@
     "test:mutation": "stryker run",
     "typecheck": "npm run build -w @juliana/contracts && npm run typecheck -w @juliana/api && npm run typecheck -w @juliana/web",
     "test": "npm run build -w @juliana/contracts && npm run test -w @juliana/contracts && npm run test -w @juliana/api && npm run test -w @juliana/web",
+    "test:coverage": "npm run build -w @juliana/contracts && npm run test:coverage -w @juliana/contracts && npm run test:coverage -w @juliana/api && npm run test:coverage -w @juliana/web",
     "test:e2e": "playwright test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -31,6 +32,7 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
     "@biomejs/biome": "2.5.8",
     "@commitlint/cli": "20.5.3",
     "@commitlint/config-conventional": "20.5.3",
@@ -38,6 +40,7 @@
     "@playwright/test": "1.62.1",
     "@stryker-mutator/core": "9.6.1",
     "@stryker-mutator/vitest-runner": "9.6.1",
+    "@vitest/coverage-v8": "4.1.10",
     "concurrently": "9.2.4",
     "dependency-cruiser": "17.4.3",
     "eslint": "9.39.5",
