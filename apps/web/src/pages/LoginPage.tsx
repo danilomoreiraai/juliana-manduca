@@ -38,7 +38,10 @@ export const LoginPage = () => {
   });
   return (
     <div className="cosmic-bg grid min-h-screen lg:grid-cols-2">
-      <div className="relative hidden overflow-hidden border-r border-ivory-100/15 p-12 lg:flex lg:flex-col lg:justify-between">
+      <aside
+        aria-label="Apresentação"
+        className="relative hidden overflow-hidden border-r border-ivory-100/15 p-12 lg:flex lg:flex-col lg:justify-between"
+      >
         <img
           src="/assets/celestial-atlas.webp"
           alt=""
@@ -54,7 +57,7 @@ export const LoginPage = () => {
           </blockquote>
         </div>
         <p className="relative z-10 muted text-sm">Juliana Manduca · Astrologia consciente</p>
-      </div>
+      </aside>
       <main className="grid place-items-center px-5 py-12">
         <div className="w-full max-w-md">
           <div className="mb-10 lg:hidden">

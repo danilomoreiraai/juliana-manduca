@@ -39,6 +39,21 @@ job `mutation`, com relatório HTML como artifact. Budgets:
 Amplie o alvo gradualmente para funções de domínio quando elas tiverem serviços isoláveis. Não rode
 mutation testing sobre componentes visuais, migrations ou adapters de infraestrutura.
 
+## Cobertura e integração
+
+- `npm run test:coverage` executa contratos, API e web com V8 e produz LCOV separado em `coverage/`.
+- A API possui uma suíte de integração opt-in com PostgreSQL real. Use `RUN_DB_INTEGRATION=true`, prepare as tabelas compatíveis com Supabase por `npm run test:db:prepare -w @juliana/api` e aplique as migrations antes dos testes.
+- O CI publica os três relatórios no Codecov por OIDC, sem armazenar token de upload no repositório.
+- Os thresholds do Vitest são pisos locais; o `codecov.yml` protege a tendência do projeto e exige 70% no patch com tolerância inicial controlada.
+- Baseline inicial de 16/08/2026: contratos 100%; API 47,42% de statements e 50,73% de linhas sem a integração opt-in; web 17,91% de statements e 18,79% de linhas. Os pisos nunca devem ser reduzidos e sobem conforme cada fluxo entra no MVP.
+
+## Playwright
+
+- A matriz funcional cobre usuário anônimo, cliente, admin em `aal1` e admin em `aal2`.
+- Os fluxos de autenticação do browser usam um Supabase isolado por interceptação de rede; autorização e isolamento de dados são novamente verificados na integração da API com JWT assinado e PostgreSQL real.
+- Há apenas uma repetição no CI. Trace é coletado na primeira repetição; vídeo, screenshot e relatório são retidos por sete dias somente quando o job falha.
+- Axe verifica landing page, login e dashboards, e a home em 375 px possui baseline visual versionado.
+
 ## Commits e execução local
 
 O Husky executa commitlint em `commit-msg`. Use mensagens como `feat: adicionar convite de cliente`
@@ -54,4 +69,9 @@ npm run typecheck
 npm run test
 npm run build
 npm run test:mutation
+npm run test:coverage
+npm run test:e2e
 ```
+
+Atualize baselines visuais somente após validar intencionalmente a mudança com
+`npm run test:e2e -- --update-snapshots`.

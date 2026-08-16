@@ -40,7 +40,7 @@ export const DashboardShell = ({
               to={href}
               className={({ isActive }) =>
                 cn(
-                  'flex shrink-0 items-center gap-3 px-3 py-2.5 text-sm text-ivory-200/65 hover:bg-plum-700/30 hover:text-ivory-100',
+                  'flex shrink-0 items-center gap-3 px-3 py-2.5 text-sm text-ivory-200 hover:bg-plum-700/30 hover:text-ivory-100',
                   isActive && 'bg-plum-700/45 text-gold-300',
                 )
               }
@@ -55,7 +55,7 @@ export const DashboardShell = ({
           <p className="muted truncate text-xs">{profile?.email}</p>
           <button
             onClick={() => void logout()}
-            className="mt-4 inline-flex items-center gap-2 text-sm text-ivory-200/65 hover:text-red-200"
+            className="mt-4 inline-flex items-center gap-2 text-sm text-ivory-200 hover:text-red-200"
           >
             <LogOut size={16} /> Sair
           </button>
