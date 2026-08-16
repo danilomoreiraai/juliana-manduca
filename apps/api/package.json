@@ -12,7 +12,8 @@
     "db:generate": "drizzle-kit generate",
     "db:check": "drizzle-kit check",
     "db:migrate": "tsx src/db/migrate.ts",
-    "bootstrap:admin": "tsx src/scripts/bootstrap-admin.ts"
+    "bootstrap:admin": "tsx src/scripts/bootstrap-admin.ts",
+    "bootstrap:test-users": "tsx src/scripts/bootstrap-test-users.ts"
   },
   "dependencies": {
     "@fastify/cors": "11.3.0",
