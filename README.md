@@ -45,6 +45,24 @@ npm run dev
 
 O frontend fica em `http://localhost:5173` e a API em `http://localhost:3333`.
 
+### Demonstração local dos portais
+
+Para validar as telas sem conectar Supabase ou API, crie `apps/web/.env.local` com:
+
+```env
+VITE_DEMO_MODE=true
+VITE_DEMO_ADMIN_EMAIL=admin.local@example.com
+VITE_DEMO_CLIENT_EMAIL=cliente.local@example.com
+VITE_DEMO_PASSWORD=uma-senha-temporaria
+VITE_DEMO_MFA_CODE=123456
+```
+
+Execute `npm run dev -w @juliana/web`. O login mostra os dois acessos configurados. O modo
+demo fornece dados fictícios e mantém alterações apenas em memória; nenhuma chamada é feita ao
+Supabase ou à API. Ele depende simultaneamente de `import.meta.env.DEV` e
+`VITE_DEMO_MODE=true`, portanto não pode ser ativado pelo bundle de produção. O `.env.local` é
+ignorado pelo Git e deve ser removido quando a validação terminar.
+
 ## Supabase
 
 Crie um projeto novo na região mais próxima do servidor. Em Auth:

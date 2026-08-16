@@ -7,6 +7,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Brand } from '../components/Brand';
 import { Button } from '../components/Button';
 import { Spinner } from '../components/Spinner';
+import { config } from '../config';
 import { useAuth } from '../context/AuthContext';
 import { getAssuranceLevel, signIn } from '../services/auth';
 
@@ -65,6 +66,15 @@ export const LoginPage = () => {
           </Link>
           <h1 className="display mt-8 text-5xl">Boas-vindas.</h1>
           <p className="muted mt-3">Acesse suas consultas e materiais privados.</p>
+          {config.demoMode && (
+            <aside className="mt-6 rounded-2xl border border-gold-300/30 bg-plum-900/50 p-4 text-sm">
+              <p className="font-semibold text-gold-200">Ambiente de demonstração</p>
+              <p className="muted mt-2">Admin: {config.demoAdminEmail}</p>
+              <p className="muted">Cliente: {config.demoClientEmail}</p>
+              <p className="muted">Senha temporária: {config.demoPassword}</p>
+              <p className="muted">MFA do admin: {config.demoMfaCode}</p>
+            </aside>
+          )}
           <form onSubmit={submit} className="mt-9 space-y-5" noValidate>
             <div>
               <label className="label" htmlFor="email">
