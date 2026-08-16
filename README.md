@@ -86,6 +86,25 @@ npm run bootstrap:admin -w @juliana/api
 
 Após o primeiro login, o admin precisa cadastrar um autenticador TOTP para alcançar `aal2`.
 
+### Usuários de validação
+
+Crie ou atualize os acessos controlados de administrador e cliente sem habilitar cadastro
+público. As senhas devem ter ao menos 12 caracteres, ficam somente no ambiente e nunca são
+impressas pelo script:
+
+```bash
+TEST_ADMIN_PASSWORD='senha-temporaria-forte' \
+TEST_CLIENT_PASSWORD='outra-senha-temporaria-forte' \
+npm run bootstrap:test-users -w @juliana/api
+```
+
+Por padrão, são usados `admin.validacao@julianamanduca.com.br` e
+`cliente.validacao@julianamanduca.com.br`. Use `TEST_ADMIN_EMAIL`, `TEST_ADMIN_NAME`,
+`TEST_CLIENT_EMAIL` e `TEST_CLIENT_NAME` para substituí-los. A execução é idempotente: usuários
+existentes têm senha, confirmação e perfil sincronizados. Depois da validação, rotacione as
+senhas ou remova os usuários pelo Supabase Auth e os respectivos perfis. O admin permanece em
+`aal1` até cadastrar e validar o TOTP na tela de MFA.
+
 ## Qualidade
 
 ```bash
