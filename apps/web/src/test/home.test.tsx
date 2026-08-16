@@ -17,5 +17,9 @@ describe('home page', () => {
     );
     expect(screen.getAllByText('Consulte valores')).toHaveLength(3);
     expect(screen.queryByRole('img', { name: /Juliana Manduca/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /instrumento celeste abstrato/i })).toHaveAttribute(
+      'src',
+      '/assets/celestial-atlas.webp',
+    );
   });
 });

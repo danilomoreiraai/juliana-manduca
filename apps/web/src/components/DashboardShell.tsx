@@ -31,7 +31,7 @@ export const DashboardShell = ({
   };
   return (
     <div className="dashboard-grid cosmic-bg">
-      <aside className="border-b border-white/8 bg-ink-900/85 p-5 md:border-b-0 md:border-r md:p-7">
+      <aside className="border-b border-ivory-100/15 bg-ink-900/75 p-5 md:border-b-0 md:border-r md:p-7">
         <Brand />
         <nav className="mt-8 flex gap-2 overflow-auto md:flex-col" aria-label="Área privada">
           {links.map(([Icon, label, href]) => (
@@ -40,8 +40,8 @@ export const DashboardShell = ({
               to={href}
               className={({ isActive }) =>
                 cn(
-                  'flex shrink-0 items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-ivory-200/65 hover:bg-white/5 hover:text-ivory-100',
-                  isActive && 'bg-white/6 text-gold-300',
+                  'flex shrink-0 items-center gap-3 px-3 py-2.5 text-sm text-ivory-200/65 hover:bg-plum-700/30 hover:text-ivory-100',
+                  isActive && 'bg-plum-700/45 text-gold-300',
                 )
               }
             >
@@ -50,7 +50,7 @@ export const DashboardShell = ({
             </NavLink>
           ))}
         </nav>
-        <div className="mt-8 border-t border-white/8 pt-5 md:mt-[45vh]">
+        <div className="mt-8 border-t border-ivory-100/15 pt-5 md:mt-[45vh]">
           <p className="truncate text-sm font-medium">{profile?.fullName}</p>
           <p className="muted truncate text-xs">{profile?.email}</p>
           <button
