@@ -51,7 +51,7 @@ export const ForgotPasswordPage = () => {
       description="Enviaremos um link seguro para criar uma nova senha."
     >
       {sent ? (
-        <div className="mt-8 rounded-xl bg-green-950/40 p-4 text-sm text-green-100">
+        <div className="mt-8 rounded-xl bg-green-100 p-4 text-sm text-green-950">
           Se o e-mail estiver cadastrado, você receberá as instruções em instantes.
         </div>
       ) : (

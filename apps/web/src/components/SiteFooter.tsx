@@ -11,7 +11,7 @@ export const SiteFooter = () => (
           Astrologia como linguagem de consciência, presença e escolha.
         </p>
       </div>
-      <div className="flex flex-col gap-3 text-sm text-ivory-200/65 md:items-end">
+      <div className="flex flex-col gap-3 text-sm text-ivory-200 md:items-end">
         <a
           href={config.instagramUrl}
           target="_blank"

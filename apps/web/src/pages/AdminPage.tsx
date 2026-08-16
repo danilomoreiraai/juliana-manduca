@@ -140,7 +140,7 @@ export const AdminPage = () => {
           <p className="muted mt-2">Clientes, consultas e materiais em um só lugar.</p>
         </div>
         {notice && (
-          <p className="rounded-xl bg-green-950/40 px-4 py-2 text-sm text-green-100">{notice}</p>
+          <p className="rounded-xl bg-green-100 px-4 py-2 text-sm text-green-950">{notice}</p>
         )}
       </header>
       {error && (

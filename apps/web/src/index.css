@@ -7,9 +7,9 @@
   --color-ink-900: #f0e2e2;
   --color-ink-800: #e6d4dd;
   --color-plum-700: #e2c5d2;
-  --color-plum-500: #c98292;
-  --color-gold-500: #c98292;
-  --color-gold-300: #8f75aa;
+  --color-plum-500: #9f5265;
+  --color-gold-500: #9f5265;
+  --color-gold-300: #6d5385;
   --color-ivory-100: #38243a;
   --color-ivory-200: #5e455f;
   --font-display: 'Manrope Variable', ui-sans-serif, system-ui, sans-serif;
@@ -27,8 +27,8 @@
   --paper-deep: #f0e2e2;
   --aubergine: #38243a;
   --plum: #674d70;
-  --lavender: #9a86b8;
-  --rose: #c98292;
+  --lavender: #6d5385;
+  --rose: #9f5265;
   --peach: #d99a7c;
   --gold: #c9a56a;
   --sage: #91a69b;
@@ -98,7 +98,7 @@ a {
 }
 
 .muted {
-  color: color-mix(in srgb, var(--aubergine) 67%, transparent);
+  color: color-mix(in srgb, var(--aubergine) 72%, transparent);
 }
 
 .panel {

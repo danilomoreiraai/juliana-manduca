@@ -11,5 +11,13 @@ export default defineConfig({
     setupFiles: './src/test/setup.ts',
     css: true,
     exclude: ['e2e/**', 'node_modules/**'],
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: ['src/main.tsx', 'src/vite-env.d.ts'],
+      reporter: ['text', 'json-summary', 'lcov'],
+      reportsDirectory: '../../coverage/web',
+      thresholds: { lines: 18, functions: 10, statements: 17, branches: 20 },
+    },
   },
 });
