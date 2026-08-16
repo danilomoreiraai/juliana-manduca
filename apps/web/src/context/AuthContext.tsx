@@ -2,12 +2,12 @@ import type { Profile } from '@juliana/contracts';
 import type { Session } from '@supabase/supabase-js';
 import {
   createContext,
+  type PropsWithChildren,
   useCallback,
   useContext,
   useEffect,
   useMemo,
   useState,
-  type PropsWithChildren,
 } from 'react';
 import { supabase } from '../lib/supabase';
 import { getProfile } from '../services/portal';

@@ -4,6 +4,7 @@ dist/
 coverage/
 playwright-report/
 test-results/
+reports/
 .vite/
 .DS_Store
 .env
