@@ -48,11 +48,15 @@ Depois valide manualmente:
 
 ## 4. Observabilidade
 
-- Preencha `SENTRY_DSN`, `VITE_SENTRY_DSN` e o SHA do commit em ambos os campos de release.
+- Preencha `SENTRY_DSN`, `VITE_SENTRY_DSN` e o SHA do commit em `RELEASE_SHA`; o Compose o
+  reutiliza no build web como `VITE_RELEASE_SHA`.
+- Configure um destino OTLP em `OTEL_EXPORTER_OTLP_ENDPOINT` quando quiser traces e métricas no
+  Collector, Datadog, New Relic ou outro backend compatível.
 - Ative o profile `monitoring` do Compose para Uptime Kuma ou use uma instância externa.
 - Monitore `https://julianamanduca.com.br/` e `https://api.julianamanduca.com.br/health/ready` a cada 60 segundos.
 - Configure alerta por e-mail ou Telegram após duas falhas consecutivas.
 - Os logs da API são JSON, possuem request ID e removem authorization, cookies, senhas e tokens.
+- Siga os SLOs, alertas, política de dados e runbook em `docs/OBSERVABILITY.md`.
 
 ## 5. Troca e rollback
 

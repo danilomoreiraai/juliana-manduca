@@ -2,24 +2,18 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { AppErrorBoundary } from './components/AppErrorBoundary';
-import { config } from './config';
+import { startWebObservability } from './observability';
 import './index.css';
 
-if (config.sentryDsn) {
-  void import('@sentry/react').then(({ init }) => {
-    init({
-      dsn: config.sentryDsn,
-      environment: import.meta.env.MODE,
-      release: config.sentryRelease,
-      sendDefaultPii: false,
-    });
-  });
-}
+const bootstrap = () => {
+  void startWebObservability();
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <AppErrorBoundary>
+        <App />
+      </AppErrorBoundary>
+    </StrictMode>,
+  );
+};
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <AppErrorBoundary>
-      <App />
-    </AppErrorBoundary>
-  </StrictMode>,
-);
+void bootstrap();

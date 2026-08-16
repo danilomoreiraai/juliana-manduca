@@ -5,7 +5,8 @@ const configSchema = z.object({
   supabaseUrl: z.url(),
   supabasePublishableKey: z.string().min(1),
   sentryDsn: z.string().optional(),
-  sentryRelease: z.string().optional(),
+  sentryTracesSampleRate: z.coerce.number().min(0).max(1).default(0.1),
+  releaseSha: z.string().optional(),
   whatsappNumber: z
     .string()
     .regex(/^\d{10,15}$/)
@@ -23,7 +24,8 @@ export const config = configSchema.parse({
     import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
     (import.meta.env.DEV ? 'local-publishable-key' : undefined),
   sentryDsn: import.meta.env.VITE_SENTRY_DSN || undefined,
-  sentryRelease: import.meta.env.VITE_SENTRY_RELEASE || undefined,
+  sentryTracesSampleRate: import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE || undefined,
+  releaseSha: import.meta.env.VITE_RELEASE_SHA || undefined,
   whatsappNumber: import.meta.env.VITE_WHATSAPP_NUMBER || undefined,
   instagramUrl: import.meta.env.VITE_INSTAGRAM_URL,
 });

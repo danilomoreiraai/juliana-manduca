@@ -1,10 +1,14 @@
 import type { LoginInput } from '@juliana/contracts';
 import { config } from '../config';
 import { supabase } from '../lib/supabase';
+import { recordApiFailure } from '../observability';
 
 export const signIn = async (input: LoginInput) => {
   const { data, error } = await supabase.auth.signInWithPassword(input);
-  if (error) throw error;
+  if (error) {
+    void recordApiFailure({ kind: 'authentication', path: '/auth/sign-in' });
+    throw error;
+  }
   return data.session;
 };
 
