@@ -7,8 +7,16 @@ test('public landing page and 404 are usable', async ({ page }) => {
     page.getByRole('link', { name: /área do cliente/i, includeHidden: true }).first(),
   ).toHaveAttribute('href', '/login');
   await expect(page.locator('[src*="juliana-atlantic"]')).toHaveCount(0);
+  await expect(page.getByRole('img', { name: /instrumento celeste abstrato/i })).toBeVisible();
   await page.goto('/pagina-inexistente');
   await expect(page.getByRole('heading', { name: /constelação não existe/i })).toBeVisible();
+});
+
+test('reduced motion keeps the primary experience available', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: /entender seus ciclos/i })).toBeVisible();
+  await expect(page.getByRole('link', { name: /conhecer atendimentos/i })).toBeVisible();
 });
 
 test('mobile navigation opens without horizontal overflow', async ({ page }) => {

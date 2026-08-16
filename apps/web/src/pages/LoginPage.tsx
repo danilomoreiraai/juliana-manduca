@@ -38,15 +38,22 @@ export const LoginPage = () => {
   });
   return (
     <div className="cosmic-bg grid min-h-screen lg:grid-cols-2">
-      <div className="hidden border-r border-white/8 p-12 lg:flex lg:flex-col lg:justify-between">
+      <div className="relative hidden overflow-hidden border-r border-ivory-100/15 p-12 lg:flex lg:flex-col lg:justify-between">
+        <img
+          src="/assets/celestial-atlas.webp"
+          alt=""
+          className="pointer-events-none absolute -bottom-52 -right-52 w-[42rem] opacity-25"
+          loading="lazy"
+          decoding="async"
+        />
         <Brand />
-        <div>
+        <div className="relative z-10">
           <p className="eyebrow">Área reservada</p>
           <blockquote className="display mt-5 max-w-lg text-5xl">
             “O mapa não limita o caminho. Ele ilumina possibilidades.”
           </blockquote>
         </div>
-        <p className="muted text-sm">Juliana Manduca · Astrologia consciente</p>
+        <p className="relative z-10 muted text-sm">Juliana Manduca · Astrologia consciente</p>
       </div>
       <main className="grid place-items-center px-5 py-12">
         <div className="w-full max-w-md">

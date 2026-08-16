@@ -3,6 +3,8 @@ import { CalendarDays, FileUp, UserPlus, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Button } from '../components/Button';
 import { DashboardShell } from '../components/DashboardShell';
+import { ContentSkeleton, SkeletonBlock } from '../components/MotionPrimitives';
+import { Spinner } from '../components/Spinner';
 import {
   createAdminConsultation,
   deleteAdminConsultation,
@@ -149,7 +151,11 @@ export const AdminPage = () => {
       <section className="mt-9 grid gap-4 sm:grid-cols-3">
         <article className="panel rounded-2xl p-5">
           <Users className="text-gold-300" size={20} />
-          <p className="display mt-5 text-4xl">{users.data?.total ?? 0}</p>
+          {users.isLoading ? (
+            <SkeletonBlock className="mt-5 h-10 w-16" />
+          ) : (
+            <p className="display mt-5 text-4xl">{users.data?.total ?? 0}</p>
+          )}
           <p className="muted text-sm">clientes cadastrados</p>
         </article>
         <article className="panel rounded-2xl p-5">
@@ -184,8 +190,12 @@ export const AdminPage = () => {
               </label>
               <input id="inviteEmail" name="email" type="email" className="input" required />
             </div>
-            <Button className="mt-5 w-full" disabled={invite.isPending}>
-              {invite.isPending ? 'Enviando…' : 'Enviar convite'}
+            <Button
+              className="mt-5 w-full"
+              disabled={invite.isPending}
+              aria-busy={invite.isPending}
+            >
+              {invite.isPending ? <Spinner label="Enviando" /> : 'Enviar convite'}
             </Button>
           </form>
           <div>
@@ -197,32 +207,41 @@ export const AdminPage = () => {
               onChange={(event) => setSearch(event.target.value)}
             />
             <div className="space-y-2">
-              {allClients.map((user) => (
-                <article
-                  key={user.id}
-                  className="panel flex flex-col justify-between gap-3 rounded-2xl p-4 sm:flex-row sm:items-center"
-                >
-                  <button className="min-w-0 text-left" onClick={() => setSelectedUserId(user.id)}>
-                    <p className="truncate font-medium">{user.fullName}</p>
-                    <p className="muted truncate text-xs">{user.email}</p>
-                  </button>
-                  <div className="flex items-center gap-2">
-                    <span className="rounded-full bg-white/6 px-3 py-1 text-xs">{user.status}</span>
-                    <Button
-                      variant="secondary"
-                      className="min-h-9 px-3 py-1 text-xs"
-                      onClick={() =>
-                        status.mutate({
-                          id: user.id,
-                          value: user.status === 'disabled' ? 'active' : 'disabled',
-                        })
-                      }
+              {users.isLoading ? (
+                <ContentSkeleton rows={4} />
+              ) : (
+                allClients.map((user) => (
+                  <article
+                    key={user.id}
+                    className="panel flex flex-col justify-between gap-3 rounded-2xl p-4 sm:flex-row sm:items-center"
+                  >
+                    <button
+                      className="min-w-0 text-left"
+                      onClick={() => setSelectedUserId(user.id)}
                     >
-                      {user.status === 'disabled' ? 'Ativar' : 'Desativar'}
-                    </Button>
-                  </div>
-                </article>
-              ))}
+                      <p className="truncate font-medium">{user.fullName}</p>
+                      <p className="muted truncate text-xs">{user.email}</p>
+                    </button>
+                    <div className="flex items-center gap-2">
+                      <span className="rounded-full bg-white/6 px-3 py-1 text-xs">
+                        {user.status}
+                      </span>
+                      <Button
+                        variant="secondary"
+                        className="min-h-9 px-3 py-1 text-xs"
+                        onClick={() =>
+                          status.mutate({
+                            id: user.id,
+                            value: user.status === 'disabled' ? 'active' : 'disabled',
+                          })
+                        }
+                      >
+                        {user.status === 'disabled' ? 'Ativar' : 'Desativar'}
+                      </Button>
+                    </div>
+                  </article>
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -271,49 +290,57 @@ export const AdminPage = () => {
               Resumo visível
             </label>
             <textarea id="summary" name="summary" className="input min-h-24" maxLength={2000} />
-            <Button className="mt-5 w-full" disabled={createConsultation.isPending}>
-              Criar consulta
+            <Button
+              className="mt-5 w-full"
+              disabled={createConsultation.isPending}
+              aria-busy={createConsultation.isPending}
+            >
+              {createConsultation.isPending ? <Spinner label="Criando" /> : 'Criar consulta'}
             </Button>
           </form>
           <div className="space-y-2">
-            {consultations.data?.map((item) => (
-              <article key={item.id} className="panel rounded-2xl p-4">
-                <div className="flex flex-col justify-between gap-3 sm:flex-row">
-                  <div>
-                    <p className="font-medium">{item.title}</p>
-                    <p className="muted mt-1 text-xs">
-                      {item.clientName} · {formatDate(item.scheduledAt)}
-                    </p>
+            {consultations.isLoading ? (
+              <ContentSkeleton rows={4} />
+            ) : (
+              consultations.data?.map((item) => (
+                <article key={item.id} className="panel rounded-2xl p-4">
+                  <div className="flex flex-col justify-between gap-3 sm:flex-row">
+                    <div>
+                      <p className="font-medium">{item.title}</p>
+                      <p className="muted mt-1 text-xs">
+                        {item.clientName} · {formatDate(item.scheduledAt)}
+                      </p>
+                    </div>
+                    <span className="h-fit rounded-full bg-white/6 px-3 py-1 text-xs">
+                      {item.status}
+                    </span>
                   </div>
-                  <span className="h-fit rounded-full bg-white/6 px-3 py-1 text-xs">
-                    {item.status}
-                  </span>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button
-                    variant="secondary"
-                    className="min-h-8 px-3 py-1 text-xs"
-                    onClick={() => updateConsultation.mutate({ id: item.id, state: 'completed' })}
-                  >
-                    Concluir
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    className="min-h-8 px-3 py-1 text-xs"
-                    onClick={() => updateConsultation.mutate({ id: item.id, state: 'cancelled' })}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    variant="danger"
-                    className="min-h-8 px-3 py-1 text-xs"
-                    onClick={() => removeConsultation.mutate(item.id)}
-                  >
-                    Excluir
-                  </Button>
-                </div>
-              </article>
-            ))}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Button
+                      variant="secondary"
+                      className="min-h-8 px-3 py-1 text-xs"
+                      onClick={() => updateConsultation.mutate({ id: item.id, state: 'completed' })}
+                    >
+                      Concluir
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="min-h-8 px-3 py-1 text-xs"
+                      onClick={() => updateConsultation.mutate({ id: item.id, state: 'cancelled' })}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      variant="danger"
+                      className="min-h-8 px-3 py-1 text-xs"
+                      onClick={() => removeConsultation.mutate(item.id)}
+                    >
+                      Excluir
+                    </Button>
+                  </div>
+                </article>
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -362,29 +389,37 @@ export const AdminPage = () => {
                 accept="application/pdf,image/jpeg,image/png,image/webp,audio/mpeg,audio/mp4,audio/x-m4a"
                 required
               />
-              <Button className="mt-5 w-full" disabled={upload.isPending}>
-                {upload.isPending ? 'Enviando…' : 'Enviar arquivo'}
+              <Button
+                className="mt-5 w-full"
+                disabled={upload.isPending}
+                aria-busy={upload.isPending}
+              >
+                {upload.isPending ? <Spinner label="Enviando" /> : 'Enviar arquivo'}
               </Button>
             </form>
             <div className="space-y-2">
-              {documents.data?.map((item) => (
-                <article
-                  key={item.id}
-                  className="panel flex items-center justify-between gap-4 rounded-2xl p-4"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate font-medium">{item.displayName}</p>
-                    <p className="muted text-xs">{item.mimeType}</p>
-                  </div>
-                  <Button
-                    variant="danger"
-                    className="min-h-9 px-3 py-1 text-xs"
-                    onClick={() => removeDocument.mutate(item.id)}
+              {documents.isLoading ? (
+                <ContentSkeleton rows={3} />
+              ) : (
+                documents.data?.map((item) => (
+                  <article
+                    key={item.id}
+                    className="panel flex items-center justify-between gap-4 rounded-2xl p-4"
                   >
-                    Excluir
-                  </Button>
-                </article>
-              ))}
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">{item.displayName}</p>
+                      <p className="muted text-xs">{item.mimeType}</p>
+                    </div>
+                    <Button
+                      variant="danger"
+                      className="min-h-9 px-3 py-1 text-xs"
+                      onClick={() => removeDocument.mutate(item.id)}
+                    >
+                      Excluir
+                    </Button>
+                  </article>
+                ))
+              )}
             </div>
           </div>
         )}

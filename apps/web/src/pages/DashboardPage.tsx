@@ -3,6 +3,7 @@ import { CalendarDays, Download, FileText, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../components/Button';
 import { DashboardShell } from '../components/DashboardShell';
+import { ContentSkeleton, SkeletonBlock } from '../components/MotionPrimitives';
 import { Spinner } from '../components/Spinner';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -59,9 +60,10 @@ export const DashboardPage = () => {
             <span className="text-sm">Próxima consulta</span>
           </div>
           {consultations.isLoading ? (
-            <p className="mt-6">
-              <Spinner />
-            </p>
+            <div className="mt-6">
+              <SkeletonBlock className="h-8 w-2/5" />
+              <SkeletonBlock className="mt-3 h-4 w-3/5" />
+            </div>
           ) : upcoming ? (
             <div className="mt-6">
               <h2 className="display text-3xl">{upcoming.title}</h2>
@@ -76,63 +78,75 @@ export const DashboardPage = () => {
             <FileText size={19} />
             <span className="text-sm">Materiais</span>
           </div>
-          <p className="display mt-6 text-4xl">{documents.data?.length ?? 0}</p>
+          {documents.isLoading ? (
+            <SkeletonBlock className="mt-6 h-10 w-16" />
+          ) : (
+            <p className="display mt-6 text-4xl">{documents.data?.length ?? 0}</p>
+          )}
           <p className="muted text-sm">arquivos disponíveis</p>
         </article>
       </section>
       <section id="consultas" className="mt-12">
         <h2 className="display text-3xl">Suas consultas</h2>
         <div className="mt-5 space-y-3">
-          {consultations.data?.length
-            ? consultations.data.map((item) => (
-                <article
-                  key={item.id}
-                  className="panel flex flex-col justify-between gap-4 rounded-2xl p-5 sm:flex-row sm:items-center"
-                >
-                  <div>
-                    <h3 className="font-semibold">{item.title}</h3>
-                    <p className="muted mt-1 text-sm">{formatDate(item.scheduledAt)}</p>
-                    {item.summary && <p className="muted mt-3 max-w-2xl text-sm">{item.summary}</p>}
-                  </div>
-                  <span className="w-fit rounded-full bg-white/6 px-3 py-1 text-xs capitalize text-gold-300">
-                    {item.status === 'scheduled'
-                      ? 'agendada'
-                      : item.status === 'completed'
-                        ? 'concluída'
-                        : 'cancelada'}
-                  </span>
-                </article>
-              ))
-            : !consultations.isLoading && (
-                <div className="panel rounded-2xl p-7 text-center muted">
-                  Seu histórico aparecerá aqui.
+          {consultations.isLoading ? (
+            <ContentSkeleton rows={3} />
+          ) : consultations.data?.length ? (
+            consultations.data.map((item) => (
+              <article
+                key={item.id}
+                className="panel flex flex-col justify-between gap-4 p-5 sm:flex-row sm:items-center"
+              >
+                <div>
+                  <h3 className="font-semibold">{item.title}</h3>
+                  <p className="muted mt-1 text-sm">{formatDate(item.scheduledAt)}</p>
+                  {item.summary && <p className="muted mt-3 max-w-2xl text-sm">{item.summary}</p>}
                 </div>
-              )}
+                <span className="w-fit bg-plum-700/45 px-3 py-1 text-xs capitalize text-gold-300">
+                  {item.status === 'scheduled'
+                    ? 'agendada'
+                    : item.status === 'completed'
+                      ? 'concluída'
+                      : 'cancelada'}
+                </span>
+              </article>
+            ))
+          ) : (
+            <div className="panel p-7 text-center muted">Seu histórico aparecerá aqui.</div>
+          )}
         </div>
       </section>
       <section id="arquivos" className="mt-12">
         <h2 className="display text-3xl">Materiais privados</h2>
         <p className="muted mt-2 text-sm">Links de download expiram após cinco minutos.</p>
         <div className="mt-5 grid gap-3 md:grid-cols-2">
-          {documents.data?.map((document) => (
-            <article
-              key={document.id}
-              className="panel flex items-center justify-between gap-4 rounded-2xl p-5"
-            >
-              <div className="min-w-0">
-                <p className="truncate font-medium">{document.displayName}</p>
-                <p className="muted mt-1 text-xs">{formatBytes(document.sizeBytes)}</p>
-              </div>
-              <Button
-                variant="secondary"
-                className="shrink-0 px-4"
-                onClick={() => download.mutate(document.id)}
-                aria-label={`Baixar ${document.displayName}`}
+          {documents.isLoading ? (
+            <div className="md:col-span-2">
+              <ContentSkeleton rows={2} />
+            </div>
+          ) : (
+            documents.data?.map((document) => (
+              <article
+                key={document.id}
+                className="panel flex items-center justify-between gap-4 p-5"
               >
-                <Download size={17} />
-              </Button>
-            </article>
-          ))}
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{document.displayName}</p>
+                  <p className="muted mt-1 text-xs">{formatBytes(document.sizeBytes)}</p>
+                </div>
+                <Button
+                  variant="secondary"
+                  className="shrink-0 px-4"
+                  onClick={() => download.mutate(document.id)}
+                  disabled={download.isPending}
+                  aria-busy={download.isPending}
+                  aria-label={`Baixar ${document.displayName}`}
+                >
+                  {download.isPending ? <Spinner label="Preparando" /> : <Download size={17} />}
+                </Button>
+              </article>
+            ))
+          )}
         </div>
       </section>
       <section className="mt-12">
@@ -163,8 +177,8 @@ export const DashboardPage = () => {
           </label>
           <input id="profileEmail" className="input" value={profile?.email ?? ''} disabled />
           <div className="mt-5 flex items-center gap-4">
-            <Button disabled={update.isPending}>
-              {update.isPending ? 'Salvando…' : 'Salvar perfil'}
+            <Button disabled={update.isPending} aria-busy={update.isPending}>
+              {update.isPending ? <Spinner label="Salvando" /> : 'Salvar perfil'}
             </Button>
             {message && <span className="text-sm text-green-200">{message}</span>}
           </div>

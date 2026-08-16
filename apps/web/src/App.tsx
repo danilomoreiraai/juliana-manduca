@@ -1,9 +1,10 @@
-import { lazy, Suspense } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { AnimatePresence, domAnimation, LazyMotion, MotionConfig, m } from 'motion/react';
+import { lazy, Suspense } from 'react';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { AdminRoute } from './components/AdminRoute';
+import { RouteSkeleton } from './components/MotionPrimitives';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { Spinner } from './components/Spinner';
 import { AuthProvider } from './context/AuthContext';
 
 const AdminPage = lazy(() =>
@@ -38,18 +39,20 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 30_000, retry: 1 } },
 });
 
-export const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <BrowserRouter>
-      <AuthProvider>
-        <Suspense
-          fallback={
-            <div className="grid min-h-screen place-items-center">
-              <Spinner />
-            </div>
-          }
+const AppRoutes = () => {
+  const location = useLocation();
+
+  return (
+    <Suspense fallback={<RouteSkeleton />}>
+      <AnimatePresence mode="wait" initial={false}>
+        <m.div
+          key={location.pathname}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.22, ease: 'easeOut' }}
         >
-          <Routes>
+          <Routes location={location}>
             <Route path="/" element={<HomePage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/esqueci-a-senha" element={<ForgotPasswordPage />} />
@@ -66,7 +69,21 @@ export const App = () => (
             </Route>
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
-        </Suspense>
+        </m.div>
+      </AnimatePresence>
+    </Suspense>
+  );
+};
+
+export const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <BrowserRouter>
+      <AuthProvider>
+        <MotionConfig reducedMotion="user">
+          <LazyMotion features={domAnimation} strict>
+            <AppRoutes />
+          </LazyMotion>
+        </MotionConfig>
       </AuthProvider>
     </BrowserRouter>
   </QueryClientProvider>
