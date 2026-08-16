@@ -9,8 +9,8 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 import {
   BatchSpanProcessor,
   ParentBasedSampler,
-  TraceIdRatioBasedSampler,
   type SpanProcessor,
+  TraceIdRatioBasedSampler,
 } from '@opentelemetry/sdk-trace-base';
 import {
   ATTR_DEPLOYMENT_ENVIRONMENT_NAME,

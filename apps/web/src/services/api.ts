@@ -3,7 +3,7 @@ import { config } from '../config';
 import { supabase } from '../lib/supabase';
 import { recordApiFailure } from '../observability';
 
-export class ApiRequestError extends Error {
+class ApiRequestError extends Error {
   constructor(
     message: string,
     readonly statusCode: number,

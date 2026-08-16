@@ -1,5 +1,5 @@
-import { CalendarDays, FileText, Home, LogOut, ShieldCheck, Users } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { CalendarDays, FileText, Home, LogOut, ShieldCheck, Users } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';

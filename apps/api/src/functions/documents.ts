@@ -1,7 +1,7 @@
-import type { Document } from '@juliana/contracts';
-import { and, desc, eq } from 'drizzle-orm';
 import { randomUUID } from 'node:crypto';
 import type { MultipartFile } from '@fastify/multipart';
+import type { Document } from '@juliana/contracts';
+import { and, desc, eq } from 'drizzle-orm';
 import { auditEvents, consultations, documents, profiles } from '../db/schema.js';
 import { AppError, notFound } from '../lib/errors.js';
 import { uploadStorageObject } from '../lib/storage.js';

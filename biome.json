@@ -1,0 +1,16 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.8/schema.json",
+  "assist": {
+    "enabled": true,
+    "includes": ["apps/**/src/**/*.{ts,tsx}", "packages/**/src/**/*.ts"],
+    "actions": {
+      "recommended": false,
+      "source": { "organizeImports": "on" }
+    }
+  },
+  "formatter": { "enabled": false },
+  "linter": { "enabled": false },
+  "files": {
+    "includes": ["**", "!!**/dist", "!!**/coverage", "!!apps/api/drizzle"]
+  }
+}
