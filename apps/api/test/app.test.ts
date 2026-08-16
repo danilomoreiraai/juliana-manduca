@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { parseEnv } from '../src/env.js';
+import { AppError } from '../src/lib/errors.js';
 
 const env = parseEnv({
   NODE_ENV: 'test',
@@ -29,6 +30,21 @@ describe('api app', () => {
     const response = await app.inject({ method: 'GET', url: '/unknown' });
     expect(response.statusCode).toBe(404);
     expect(response.json()).toEqual({ message: 'Rota não encontrada', statusCode: 404 });
+    await app.close();
+  });
+
+  it('applies the error response contract inside registered route scopes', async () => {
+    const app = await buildApp({ env, db: {} as never, supabase: { admin: {} } as never });
+    await app.register(async (scope) => {
+      scope.get('/scoped-error', async () => {
+        throw new AppError('Conta desativada', 403);
+      });
+    });
+
+    const response = await app.inject({ method: 'GET', url: '/scoped-error' });
+
+    expect(response.statusCode).toBe(403);
+    expect(response.json()).toEqual({ message: 'Conta desativada', statusCode: 403 });
     await app.close();
   });
 });
