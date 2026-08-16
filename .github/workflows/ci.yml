@@ -29,6 +29,11 @@ jobs:
     env:
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/juliana_ci
       RUN_DB_INTEGRATION: 'true'
+      WEB_URL: http://localhost:5173
+      CORS_ORIGINS: http://localhost:5173
+      SUPABASE_URL: http://127.0.0.1:54321
+      SUPABASE_PUBLISHABLE_KEY: ci-publishable-key
+      SUPABASE_SECRET_KEY: ci-secret-key
       VITE_API_URL: http://127.0.0.1:3333
       VITE_SUPABASE_URL: http://127.0.0.1:54321
       VITE_SUPABASE_PUBLISHABLE_KEY: ci-publishable-key
