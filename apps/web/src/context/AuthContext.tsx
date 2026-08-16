@@ -9,7 +9,9 @@ import {
   useMemo,
   useState,
 } from 'react';
+import { config } from '../config';
 import { supabase } from '../lib/supabase';
+import { DEMO_AUTH_EVENT, readDemoSession } from '../services/demo';
 import { getProfile } from '../services/portal';
 
 interface AuthContextValue {
@@ -38,6 +40,23 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   useEffect(() => {
+    if (config.demoMode) {
+      let active = true;
+      const syncDemoSession = async () => {
+        const nextSession = readDemoSession();
+        setSession(nextSession);
+        if (nextSession) await refreshProfile();
+        else setProfile(null);
+        if (active) setLoading(false);
+      };
+      void syncDemoSession();
+      window.addEventListener(DEMO_AUTH_EVENT, syncDemoSession);
+      return () => {
+        active = false;
+        window.removeEventListener(DEMO_AUTH_EVENT, syncDemoSession);
+      };
+    }
+
     let active = true;
     void supabase.auth.getSession().then(async ({ data }) => {
       if (!active) return;

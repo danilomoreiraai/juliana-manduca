@@ -8,42 +8,95 @@ import type {
   UpdateProfileInput,
   UpdateUserStatusInput,
 } from '@juliana/contracts';
+import { config } from '../config';
 import { apiRequest } from './api';
+import {
+  createDemoConsultation,
+  deleteDemoConsultation,
+  deleteDemoDocument,
+  getDemoConsultations,
+  getDemoDocuments,
+  getDemoProfile,
+  getDemoUsers,
+  inviteDemoUser,
+  setDemoUserStatus,
+  updateDemoConsultation,
+  updateDemoProfile,
+  uploadDemoDocument,
+} from './demo';
 
-export const getProfile = () => apiRequest<Profile>('/me');
+export const getProfile = () =>
+  config.demoMode ? Promise.resolve(getDemoProfile()) : apiRequest<Profile>('/me');
 export const updateProfile = (input: UpdateProfileInput) =>
-  apiRequest<Profile>('/me', { method: 'PATCH', body: JSON.stringify(input) });
-export const getConsultations = () => apiRequest<Consultation[]>('/consultations');
-export const getDocuments = () => apiRequest<Document[]>('/documents');
+  config.demoMode
+    ? Promise.resolve(updateDemoProfile(input))
+    : apiRequest<Profile>('/me', { method: 'PATCH', body: JSON.stringify(input) });
+export const getConsultations = () =>
+  config.demoMode
+    ? Promise.resolve(getDemoConsultations())
+    : apiRequest<Consultation[]>('/consultations');
+export const getDocuments = () =>
+  config.demoMode ? Promise.resolve(getDemoDocuments()) : apiRequest<Document[]>('/documents');
 export const requestDocumentDownload = (id: string) =>
-  apiRequest<{ url: string; expiresIn: number }>(`/documents/${id}/download`, { method: 'POST' });
+  config.demoMode
+    ? Promise.resolve({ url: '/assets/celestial-atlas.webp', expiresIn: 300 })
+    : apiRequest<{ url: string; expiresIn: number }>(`/documents/${id}/download`, {
+        method: 'POST',
+      });
 
 export const getAdminUsers = (search = '') =>
-  apiRequest<{ items: Profile[]; total: number }>(
-    `/admin/users?search=${encodeURIComponent(search)}`,
-  );
+  config.demoMode
+    ? Promise.resolve(getDemoUsers(search))
+    : apiRequest<{ items: Profile[]; total: number }>(
+        `/admin/users?search=${encodeURIComponent(search)}`,
+      );
 export const inviteAdminUser = (input: InviteUserInput) =>
-  apiRequest<Profile>('/admin/users/invite', { method: 'POST', body: JSON.stringify(input) });
+  config.demoMode
+    ? Promise.resolve(inviteDemoUser(input))
+    : apiRequest<Profile>('/admin/users/invite', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      });
 export const setAdminUserStatus = (id: string, input: UpdateUserStatusInput) =>
-  apiRequest<Profile>(`/admin/users/${id}`, { method: 'PATCH', body: JSON.stringify(input) });
-export const getAdminConsultations = () => apiRequest<Consultation[]>('/admin/consultations');
+  config.demoMode
+    ? Promise.resolve(setDemoUserStatus(id, input))
+    : apiRequest<Profile>(`/admin/users/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(input),
+      });
+export const getAdminConsultations = () =>
+  config.demoMode
+    ? Promise.resolve(getDemoConsultations())
+    : apiRequest<Consultation[]>('/admin/consultations');
 export const createAdminConsultation = (input: CreateConsultationInput) =>
-  apiRequest<Consultation>('/admin/consultations', { method: 'POST', body: JSON.stringify(input) });
+  config.demoMode
+    ? Promise.resolve(createDemoConsultation(input))
+    : apiRequest<Consultation>('/admin/consultations', {
+        method: 'POST',
+        body: JSON.stringify(input),
+      });
 export const updateAdminConsultation = (id: string, input: UpdateConsultationInput) =>
-  apiRequest<Consultation>(`/admin/consultations/${id}`, {
-    method: 'PATCH',
-    body: JSON.stringify(input),
-  });
+  config.demoMode
+    ? Promise.resolve(updateDemoConsultation(id, input))
+    : apiRequest<Consultation>(`/admin/consultations/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(input),
+      });
 export const deleteAdminConsultation = (id: string) =>
-  apiRequest<void>(`/admin/consultations/${id}`, { method: 'DELETE' });
+  config.demoMode
+    ? Promise.resolve(deleteDemoConsultation(id))
+    : apiRequest<void>(`/admin/consultations/${id}`, { method: 'DELETE' });
 export const getAdminDocuments = (userId: string) =>
-  apiRequest<Document[]>(`/admin/documents?userId=${encodeURIComponent(userId)}`);
+  config.demoMode
+    ? Promise.resolve(getDemoDocuments(userId))
+    : apiRequest<Document[]>(`/admin/documents?userId=${encodeURIComponent(userId)}`);
 export const uploadAdminDocument = async (input: {
   userId: string;
   consultationId?: string;
   displayName: string;
   file: File;
 }) => {
+  if (config.demoMode) return uploadDemoDocument(input);
   const query = new URLSearchParams({ userId: input.userId, displayName: input.displayName });
   if (input.consultationId) query.set('consultationId', input.consultationId);
   const body = new FormData();
@@ -51,4 +104,6 @@ export const uploadAdminDocument = async (input: {
   return apiRequest<Document>(`/admin/documents?${query.toString()}`, { method: 'POST', body });
 };
 export const deleteAdminDocument = (id: string) =>
-  apiRequest<void>(`/admin/documents/${id}`, { method: 'DELETE' });
+  config.demoMode
+    ? Promise.resolve(deleteDemoDocument(id))
+    : apiRequest<void>(`/admin/documents/${id}`, { method: 'DELETE' });
