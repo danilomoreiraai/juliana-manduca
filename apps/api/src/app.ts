@@ -88,12 +88,6 @@ export const buildApp = async (services: AppServices) => {
     );
   });
 
-  await app.register(healthRoutes, { prefix: '/health' });
-  await app.register(meRoutes, { prefix: '/me' });
-  await app.register(consultationRoutes, { prefix: '/consultations' });
-  await app.register(documentRoutes, { prefix: '/documents' });
-  await app.register(adminRoutes, { prefix: '/admin' });
-
   app.setNotFoundHandler((_request, reply) =>
     reply.status(404).send({ message: 'Rota não encontrada', statusCode: 404 }),
   );
@@ -109,6 +103,12 @@ export const buildApp = async (services: AppServices) => {
     }
     return reply.status(statusCode).send({ message, statusCode });
   });
+
+  await app.register(healthRoutes, { prefix: '/health' });
+  await app.register(meRoutes, { prefix: '/me' });
+  await app.register(consultationRoutes, { prefix: '/consultations' });
+  await app.register(documentRoutes, { prefix: '/documents' });
+  await app.register(adminRoutes, { prefix: '/admin' });
 
   return app;
 };

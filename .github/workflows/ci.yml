@@ -7,12 +7,33 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   quality:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: juliana_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d juliana_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/juliana_ci
+      RUN_DB_INTEGRATION: 'true'
+      WEB_URL: http://localhost:5173
+      CORS_ORIGINS: http://localhost:5173
+      SUPABASE_URL: http://127.0.0.1:54321
+      SUPABASE_PUBLISHABLE_KEY: ci-publishable-key
+      SUPABASE_SECRET_KEY: ci-secret-key
       VITE_API_URL: http://127.0.0.1:3333
       VITE_SUPABASE_URL: http://127.0.0.1:54321
       VITE_SUPABASE_PUBLISHABLE_KEY: ci-publishable-key
@@ -27,7 +48,16 @@ jobs:
       - run: npm run lint
       - run: npm run knip
       - run: npm run typecheck
-      - run: npm run test
+      - run: npm run test:db:prepare -w @juliana/api
+      - run: npm run db:migrate -w @juliana/api
+      - run: npm run test:coverage
+      - name: Publish coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          use_oidc: true
+          files: ./coverage/contracts/lcov.info,./coverage/api/lcov.info,./coverage/web/lcov.info
+          flags: contracts,api,web
+          fail_ci_if_error: true
       - run: npm run db:check -w @juliana/api
       - run: npm run build
 
@@ -78,3 +108,11 @@ jobs:
           VITE_API_URL: http://127.0.0.1:3333
           VITE_SUPABASE_URL: http://127.0.0.1:54321
           VITE_SUPABASE_PUBLISHABLE_KEY: local-publishable-key
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-failure-${{ github.run_attempt }}
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
