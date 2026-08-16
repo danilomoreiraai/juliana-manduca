@@ -67,4 +67,29 @@ describe('apiRequest', () => {
       expect.objectContaining({ path: '/me', requestId: 'request-123', statusCode: 401 }),
     );
   });
+
+  it('uses the safe fallback for an unauthenticated upload failure without JSON', async () => {
+    getSession.mockResolvedValue({ data: { session: null } });
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(new Response('gateway unavailable', { status: 502 }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(
+      apiRequest('/admin/documents', { method: 'POST', body: JSON.stringify({}) }),
+    ).rejects.toMatchObject({
+      message: 'Não foi possível concluir a solicitação',
+      statusCode: 502,
+      requestId: undefined,
+    });
+
+    const headers = fetchMock.mock.calls.at(0)?.[1]?.headers as Headers;
+    expect(headers.has('authorization')).toBe(false);
+    expect(headers.get('content-type')).toBe('application/json');
+    expect(recordApiFailure).toHaveBeenCalledWith({
+      kind: 'upload',
+      path: '/admin/documents',
+      statusCode: 502,
+    });
+  });
 });
