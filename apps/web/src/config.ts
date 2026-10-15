@@ -43,7 +43,7 @@ export const config = configSchema.parse({
   sentryTracesSampleRate: import.meta.env.VITE_SENTRY_TRACES_SAMPLE_RATE || undefined,
   releaseSha: import.meta.env.VITE_RELEASE_SHA || undefined,
   whatsappNumber: import.meta.env.VITE_WHATSAPP_NUMBER || undefined,
-  instagramUrl: import.meta.env.VITE_INSTAGRAM_URL,
+  instagramUrl: import.meta.env.VITE_INSTAGRAM_URL || undefined,
   demoMode: import.meta.env.DEV && import.meta.env.VITE_DEMO_MODE === 'true',
   demoAdminEmail: import.meta.env.DEV
     ? import.meta.env.VITE_DEMO_ADMIN_EMAIL || undefined
