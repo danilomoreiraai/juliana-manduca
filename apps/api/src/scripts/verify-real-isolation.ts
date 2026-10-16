@@ -236,7 +236,7 @@ main().catch((error: unknown) => {
   console.error(
     error instanceof Error && error.constructor === Error
       ? error.message
-      : 'Unexpected validation failure; inspect local logs without sharing sensitive values',
+      : `Unexpected validation failure (${error instanceof Error ? error.name : typeof error}); inspect local logs without sharing sensitive values`,
   );
   process.exitCode = 1;
 });

@@ -1,6 +1,6 @@
 # Validação real de isolamento (#31)
 
-Este roteiro usa somente o projeto Supabase isolado `rxxriflonxesgvxokptk` e a API dev. O script recusa outro projeto, cria uma cliente B e dois PDFs sintéticos, testa as rotas e remove as fixtures em `finally`. Ele nunca imprime credenciais, tokens, URLs assinadas, e-mails ou IDs de usuários.
+Este roteiro usa somente o projeto Supabase isolado `rxxriflonxesgvxokptk` e a API dev. O script recusa outro projeto, cria uma cliente B e dois PDFs sintéticos, testa as rotas e executa a limpeza após sucesso ou falha. Ele nunca imprime credenciais, tokens, URLs assinadas, e-mails ou IDs de usuários.
 
 ## Pré-requisitos
 
@@ -21,13 +21,13 @@ O script verifica autorização anônima, cliente e admin AAL1; bucket privado; 
 
 ## Evidência de 17/10/2026
 
-| Cenário                                                                                 | Resultado                                                                  |
-| --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| API `/health/ready`; anônimo 401; cliente sem acesso admin; admin AAL1 sem acesso admin | Passou                                                                     |
-| Bucket `consultation-files` privado                                                     | Passou                                                                     |
-| Cliente A/B listam seus próprios PDFs e recebem 404 ao baixar o PDF da outra            | Passou                                                                     |
-| Supabase gera URL assinada diretamente com a chave local de validação                   | Passou                                                                     |
-| API dev gera URL assinada para a própria cliente                                        | Falhou com HTTP 502                                                        |
-| Limpeza das fixtures após a falha                                                       | Passou; contagens voltaram a 2 perfis, 0 documentos e 0 objetos `issue31-` |
+| Cenário                                                                                 | Resultado                                                              |
+| --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| API `/health/ready`; anônimo 401; cliente sem acesso admin; admin AAL1 sem acesso admin | Passou                                                                 |
+| Bucket `consultation-files` privado e acesso anônimo ao objeto negado                   | Passou                                                                 |
+| Cliente A/B listam seus próprios PDFs e recebem 404 ao baixar o PDF da outra            | Passou                                                                 |
+| Download do PDF próprio pela API, URL assinada e conteúdo sintético                     | Passou; resposta declarou validade de 300 segundos                     |
+| Cliente B desativada acessa `/me` ou `/documents`                                       | Negado com HTTP 403 em ambas as rotas                                  |
+| Limpeza das fixtures após sucesso ou falha                                              | Passou; contagens finais: 2 perfis, 0 documentos, 0 objetos `issue31-` |
 
-O valor de `SUPABASE_SECRET_KEY` configurado na API dev tem formato curto e difere da chave local funcional. A configuração do EasyPanel deve ser corrigida e o teste repetido antes de atribuir o 502 a outro componente. Os cenários de cliente desativada, admin AAL2 e expiração efetiva da URL ainda não têm evidência real concluída. O script só verifica o tempo declarado de 300 segundos, não aguarda a expiração.
+Na primeira execução, o download próprio retornou HTTP 502. A chave `SUPABASE_SECRET_KEY` da API dev tinha um valor incompleto. Após a correção da variável no EasyPanel e novo deploy, a matriz acima passou. O admin AAL2 e a expiração efetiva da URL ainda não têm evidência real concluída. O script verifica o tempo declarado de 300 segundos, mas não aguarda a expiração.
