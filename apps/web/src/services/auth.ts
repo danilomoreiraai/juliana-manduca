@@ -4,6 +4,8 @@ import { supabase } from '../lib/supabase';
 import { recordApiFailure } from '../observability';
 import { getDemoAssuranceLevel, signInDemo, signOutDemo, verifyDemoMfa } from './demo';
 
+const ADMIN_MFA_FACTOR_NAME = 'Juliana Manduca Admin';
+
 export const signIn = async (input: LoginInput) => {
   if (config.demoMode) return signInDemo(input);
   const { data, error } = await supabase.auth.signInWithPassword(input);
@@ -56,9 +58,21 @@ export const listMfaFactors = async () => {
 
 export const enrollMfa = async () => {
   if (config.demoMode) return { id: 'demo-factor', totp: { qr_code: '', secret: 'DEMO-LOCAL' } };
+  const { data: factors, error: listError } = await supabase.auth.mfa.listFactors();
+  if (listError) throw listError;
+  for (const factor of factors.all) {
+    if (
+      factor.factor_type !== 'totp' ||
+      factor.status !== 'unverified' ||
+      factor.friendly_name !== ADMIN_MFA_FACTOR_NAME
+    )
+      continue;
+    const { error } = await supabase.auth.mfa.unenroll({ factorId: factor.id });
+    if (error) throw error;
+  }
   const { data, error } = await supabase.auth.mfa.enroll({
     factorType: 'totp',
-    friendlyName: 'Juliana Manduca Admin',
+    friendlyName: ADMIN_MFA_FACTOR_NAME,
   });
   if (error) throw error;
   return data;

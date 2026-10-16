@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Brand } from '../components/Brand';
 import { Button } from '../components/Button';
@@ -12,40 +12,52 @@ export const MfaPage = () => {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [verifying, setVerifying] = useState(false);
   const initialized = useRef(false);
+
+  const prepare = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    setFactorId('');
+    setQrCode('');
+    setSecret('');
+    setCode('');
+    try {
+      const factors = await listMfaFactors();
+      if (factors[0]) {
+        setFactorId(factors[0].id);
+        return;
+      }
+
+      const enrollment = await enrollMfa();
+      setFactorId(enrollment.id);
+      setQrCode(enrollment.totp.qr_code);
+      setSecret(enrollment.totp.secret);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Falha ao configurar MFA');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
-
-    void (async () => {
-      try {
-        const factors = await listMfaFactors();
-        if (factors[0]) {
-          setFactorId(factors[0].id);
-          return;
-        }
-
-        const enrollment = await enrollMfa();
-        setFactorId(enrollment.id);
-        setQrCode(enrollment.totp.qr_code);
-        setSecret(enrollment.totp.secret);
-      } catch (caught) {
-        setError(caught instanceof Error ? caught.message : 'Falha ao configurar MFA');
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+    void prepare();
+  }, [prepare]);
 
   const verify = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!factorId || code.length !== 6 || verifying) return;
     setError('');
+    setVerifying(true);
     try {
       await verifyMfa(factorId, code);
       navigate('/admin');
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Código inválido');
+    } finally {
+      setVerifying(false);
     }
   };
   return (
@@ -82,11 +94,23 @@ export const MfaPage = () => {
                 value={code}
                 onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))}
               />
-              {error && <p className="field-error">{error}</p>}
-              <Button className="mt-5 w-full" disabled={code.length !== 6}>
-                Verificar e continuar
+              {error && (
+                <p role="alert" className="field-error">
+                  {error}
+                </p>
+              )}
+              <Button
+                className="mt-5 w-full"
+                disabled={!factorId || code.length !== 6 || verifying}
+              >
+                {verifying ? 'Verificando…' : 'Verificar e continuar'}
               </Button>
             </form>
+            {error && !factorId && (
+              <Button type="button" className="mt-3 w-full" onClick={() => void prepare()}>
+                Tentar novamente
+              </Button>
+            )}
           </>
         )}
       </main>
