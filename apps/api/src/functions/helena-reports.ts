@@ -77,15 +77,13 @@ export const previewHelenaReport = async (
           })
           .returning();
         if (!created) throw new Error('Report was not created');
-        await tx
-          .insert(auditEvents)
-          .values({
-            actorId: actor.id,
-            action: 'helena.report.generated',
-            entityType: 'helena_report',
-            entityId: created.id,
-            metadata: { revision },
-          });
+        await tx.insert(auditEvents).values({
+          actorId: actor.id,
+          action: 'helena.report.generated',
+          entityType: 'helena_report',
+          entityId: created.id,
+          metadata: { revision },
+        });
         return created;
       });
       if (report.storagePath !== path) await removeOwnUnusedObject();
@@ -144,14 +142,12 @@ export const publishHelenaReport = async (
       .update(helenaReports)
       .set({ documentId: document.id, publishedBy: actor.id, publishedAt: new Date() })
       .where(eq(helenaReports.id, report.id));
-    await tx
-      .insert(auditEvents)
-      .values({
-        actorId: actor.id,
-        action: 'helena.report.published',
-        entityType: 'document',
-        entityId: document.id,
-        metadata: { draftId: id, reportId: report.id, revision: input.revision },
-      });
+    await tx.insert(auditEvents).values({
+      actorId: actor.id,
+      action: 'helena.report.published',
+      entityType: 'document',
+      entityId: document.id,
+      metadata: { draftId: id, reportId: report.id, revision: input.revision },
+    });
     return { documentId: document.id, revision: input.revision };
   });
