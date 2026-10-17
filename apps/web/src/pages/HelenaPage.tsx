@@ -1,13 +1,24 @@
-import type { HelenaNatalInput, HelenaNatalResult } from '@juliana/contracts';
+import type { HelenaDraft, HelenaNatalInput, HelenaNatalResult } from '@juliana/contracts';
 import { useMutation } from '@tanstack/react-query';
 import { Orbit } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Button } from '../components/Button';
 import { DashboardShell } from '../components/DashboardShell';
+import { HelenaDraftPanel } from '../components/helena/HelenaDraftPanel';
 import { HelenaForm } from '../components/helena/HelenaForm';
+import { HelenaLibrary } from '../components/helena/HelenaLibrary';
 import { HelenaResults } from '../components/helena/HelenaResults';
 import { calculateNatal } from '../services/helena';
 
 export const HelenaPage = () => {
+  const [saved, setSaved] = useState<HelenaDraft | null>(null);
+  const [creationId, setCreationId] = useState(() => crypto.randomUUID());
+  const [formEpoch, setFormEpoch] = useState(0);
+  const [contentBusy, setContentBusy] = useState(false);
+  const dirty = useRef(false);
+  const onDirty = useCallback((value: boolean) => {
+    dirty.current = value;
+  }, []);
   const revision = useRef(0);
   const controller = useRef<AbortController | null>(null);
   const [result, setResult] = useState<{ chart: HelenaNatalResult; name: string } | null>(null);
@@ -31,11 +42,41 @@ export const HelenaPage = () => {
     retry: false,
   });
   const edit = () => {
+    dirty.current = true;
     revision.current++;
     controller.current?.abort();
     mutation.reset();
     setResult(null);
     setError('');
+  };
+  const openSaved = (draft: HelenaDraft) => {
+    if (dirty.current && !window.confirm('Há alterações não salvas. Descartar e abrir este mapa?'))
+      return;
+    revision.current++;
+    controller.current?.abort();
+    mutation.reset();
+    setError('');
+    setSaved(draft);
+    setResult({ chart: draft.result, name: draft.subjectName });
+    setFormEpoch((value) => value + 1);
+    dirty.current = false;
+  };
+  const onSaved = (draft: HelenaDraft) => {
+    setSaved(draft);
+    setResult({ chart: draft.result, name: draft.subjectName });
+    dirty.current = false;
+  };
+  const newMap = () => {
+    if (
+      dirty.current &&
+      !window.confirm('Há alterações não salvas. Descartar e iniciar outro mapa?')
+    )
+      return;
+    edit();
+    setSaved(null);
+    setCreationId(crypto.randomUUID());
+    setFormEpoch((value) => value + 1);
+    dirty.current = false;
   };
   const calculate = (input: HelenaNatalInput, name: string) => {
     controller.current?.abort();
@@ -50,22 +91,49 @@ export const HelenaPage = () => {
       <header className="mb-8">
         <p className="eyebrow">Ateliê de astrologia · Administração</p>
         <h1 className="display mt-3 text-5xl">HELENA</h1>
+        <Button
+          className="mt-4"
+          variant="secondary"
+          disabled={contentBusy || mutation.isPending}
+          onClick={newMap}
+        >
+          Novo mapa
+        </Button>
         <p className="muted mt-4 max-w-2xl">
           Calcule o mapa natal e revise posições, casas e aspectos para preparar seus conteúdos.
         </p>
       </header>
+      <HelenaLibrary
+        onOpen={openSaved}
+        onBusy={setContentBusy}
+        disabled={contentBusy || mutation.isPending}
+      />
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(300px,0.85fr)_minmax(0,1.4fr)]">
         <div className="min-w-0">
-          <HelenaForm pending={mutation.isPending} onEdit={edit} onCalculate={calculate} />
+          <HelenaForm
+            key={`${formEpoch}:${saved?.id ?? 'new'}:${saved?.revision ?? 0}`}
+            pending={mutation.isPending}
+            disabled={contentBusy}
+            {...(saved ? { initial: { input: saved.result.input, name: saved.subjectName } } : {})}
+            onEdit={edit}
+            onCalculate={calculate}
+          />
+          <HelenaDraftPanel
+            key={`${saved?.id ?? creationId}:${saved?.revision ?? 0}`}
+            chart={result?.chart ?? null}
+            disabled={contentBusy || mutation.isPending}
+            name={result?.name ?? saved?.subjectName ?? ''}
+            saved={saved}
+            creationId={creationId}
+            onSaved={onSaved}
+            onBusy={setContentBusy}
+            onDirty={onDirty}
+          />
           {error && (
             <p className="mt-4 rounded-xl border border-gold-500 p-4 text-sm" role="alert">
               {error}
             </p>
           )}
-          <p className="muted mt-4 text-xs">
-            Esta etapa permite cálculo e exportação local. Salvar mapas e enviar materiais aos
-            clientes serão as próximas integrações.
-          </p>
         </div>
         {result ? (
           <HelenaResults chart={result.chart} name={result.name} />

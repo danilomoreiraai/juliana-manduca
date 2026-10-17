@@ -28,6 +28,12 @@ await sql.unsafe(`
     file_size_limit bigint,
     allowed_mime_types text[]
   );
+  CREATE TABLE IF NOT EXISTS storage.objects (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    bucket_id text NOT NULL,
+    name text NOT NULL
+  );
+  ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 `);
 
 await sql.end();

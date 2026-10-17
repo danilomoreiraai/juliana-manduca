@@ -1,10 +1,20 @@
 import { createServer, type Server } from 'node:http';
 import { exportJWK, generateKeyPair, SignJWT, type KeyLike } from 'jose';
 import postgres from 'postgres';
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { eq } from 'drizzle-orm';
+import natalFixture from '../../../packages/contracts/test/fixtures/helena-j2000.json' with { type: 'json' };
+import * as helenaEngine from '../src/functions/helena.js';
 import { buildApp } from '../src/app.js';
 import { createDatabase } from '../src/db/index.js';
-import { auditEvents, consultations, documents, profiles } from '../src/db/schema.js';
+import {
+  auditEvents,
+  consultations,
+  documents,
+  profiles,
+  helenaDrafts,
+  helenaReports,
+} from '../src/db/schema.js';
 import { parseEnv, type Env } from '../src/env.js';
 import type { AppServices } from '../src/types.js';
 
@@ -20,6 +30,8 @@ const ids = {
 };
 
 integration('API with isolated PostgreSQL and Supabase-compatible auth', () => {
+  const uploadReport = vi.fn();
+  const removeReport = vi.fn();
   let jwksServer: Server;
   let privateKey: KeyLike;
   let env: Env;
@@ -41,11 +53,12 @@ integration('API with isolated PostgreSQL and Supabase-compatible auth', () => {
       admin: {
         storage: {
           from: () => ({
+            upload: uploadReport,
             createSignedUrl: async (path: string) => ({
               data: { signedUrl: `https://storage.test/${path}` },
               error: null,
             }),
-            remove: async () => ({ data: [], error: null }),
+            remove: removeReport,
           }),
         },
         auth: { admin: {} },
@@ -88,6 +101,10 @@ integration('API with isolated PostgreSQL and Supabase-compatible auth', () => {
   });
 
   beforeEach(async () => {
+    uploadReport.mockReset().mockResolvedValue({ data: {}, error: null });
+    removeReport.mockReset().mockResolvedValue({ data: [], error: null });
+    await database.db.delete(helenaReports);
+    await database.db.delete(helenaDrafts);
     await database.db.delete(auditEvents);
     await database.db.delete(documents);
     await database.db.delete(consultations);
@@ -156,6 +173,231 @@ integration('API with isolated PostgreSQL and Supabase-compatible auth', () => {
     await new Promise<void>((resolve, reject) =>
       jwksServer?.close((error) => (error ? reject(error) : resolve())),
     );
+  });
+  afterEach(() => vi.restoreAllMocks());
+
+  const savedInput = () => ({
+    id: '90000000-0000-4000-8000-000000000001',
+    clientId: ids.clientA,
+    subjectName: 'João sintético',
+    title: 'Mapa natal sintético',
+    analysis: 'Análise revisada, com acentos.',
+    natal: natalFixture.input,
+  });
+
+  it('blocks direct client Storage access to HELENA even with a broad permissive policy', async () => {
+    await sql.begin(async (tx) => {
+      await tx.unsafe(
+        'GRANT USAGE ON SCHEMA storage TO authenticated; GRANT SELECT ON storage.objects TO authenticated',
+      );
+      await tx.unsafe(
+        'CREATE POLICY helena_test_permissive ON storage.objects FOR SELECT TO authenticated USING (true)',
+      );
+      await tx`insert into storage.objects (bucket_id, name) values ('consultation-files', 'helena-private/synthetic.pdf'), ('consultation-files', 'synthetic-other.pdf')`;
+      await tx.unsafe('SET LOCAL ROLE authenticated');
+      const rows = await tx<{ name: string }[]>`select name from storage.objects`;
+      expect(rows.map((row) => row.name)).toContain('synthetic-other.pdf');
+      expect(rows.map((row) => row.name)).not.toContain('helena-private/synthetic.pdf');
+      await tx.unsafe('SET LOCAL ROLE NONE');
+      await tx.unsafe('DROP POLICY helena_test_permissive ON storage.objects');
+      await tx`delete from storage.objects where name in ('helena-private/synthetic.pdf', 'synthetic-other.pdf')`;
+    });
+  });
+
+  it('saves server-calculated snapshots and publishes the exact reviewed PDF only once', async () => {
+    const calculate = vi
+      .spyOn(helenaEngine, 'calculateHelenaNatal')
+      .mockResolvedValue(natalFixture as never);
+    const app = await buildTestApp();
+    const headers = { authorization: `Bearer ${await tokenFor(ids.admin, 'aal2')}` };
+    const payload = savedInput();
+    const request = (method: 'GET' | 'POST' | 'PUT', suffix = '', body?: unknown) =>
+      app.inject({
+        method,
+        url: `/admin/helena/charts${suffix}`,
+        headers,
+        ...(body ? { payload: body } : {}),
+      });
+    try {
+      expect((await request('POST', '', { ...payload, result: natalFixture })).statusCode).toBe(
+        400,
+      );
+      const created = await request('POST', '', payload);
+      expect(created.statusCode).toBe(201);
+      expect(created.json()).toMatchObject({
+        id: payload.id,
+        revision: 1,
+        result: natalFixture,
+        report: null,
+      });
+      const replay = await request('POST', '', payload);
+      expect(replay.json().id).toBe(payload.id);
+      expect(calculate).toHaveBeenCalledOnce();
+      expect((await request('GET')).json().total).toBe(1);
+      expect((await request('GET', `/${payload.id}`)).json().analysis).toBe(payload.analysis);
+      expect(
+        (await request('POST', `/${payload.id}/publish`, { revision: 1, reportId: payload.id }))
+          .statusCode,
+      ).toBe(409);
+      const preview = await request('POST', `/${payload.id}/preview`, { revision: 1 });
+      expect(preview.statusCode).toBe(200);
+      expect(preview.json()).toMatchObject({ revision: 1, expiresIn: 300 });
+      await request('POST', `/${payload.id}/preview`, { revision: 1 });
+      expect(uploadReport).toHaveBeenCalledOnce();
+      const pdf = uploadReport.mock.calls[0]?.[1] as Buffer;
+      expect(pdf.subarray(0, 5).toString()).toBe('%PDF-');
+      const before = await app.inject({
+        method: 'GET',
+        url: '/documents',
+        headers: { authorization: `Bearer ${await tokenFor(ids.clientA)}` },
+      });
+      expect(before.json()).toHaveLength(1);
+      const body = { revision: 1, reportId: preview.json().reportId };
+      const [first, second] = await Promise.all([
+        request('POST', `/${payload.id}/publish`, body),
+        request('POST', `/${payload.id}/publish`, body),
+      ]);
+      expect(first.statusCode).toBe(200);
+      expect(second.json()).toEqual(first.json());
+      const deliveredId = first.json().documentId;
+      const [stored] = await database.db
+        .select()
+        .from(documents)
+        .where(eq(documents.id, deliveredId));
+      expect(stored?.storagePath).toBe(uploadReport.mock.calls[0]?.[0]);
+      const own = await app.inject({
+        method: 'POST',
+        url: `/documents/${deliveredId}/download`,
+        headers: { authorization: `Bearer ${await tokenFor(ids.clientA)}` },
+      });
+      const other = await app.inject({
+        method: 'POST',
+        url: `/documents/${deliveredId}/download`,
+        headers: { authorization: `Bearer ${await tokenFor(ids.clientB)}` },
+      });
+      expect(own.statusCode).toBe(200);
+      expect(other.statusCode).toBe(404);
+      const content = {
+        clientId: payload.clientId,
+        subjectName: payload.subjectName,
+        title: payload.title,
+        analysis: payload.analysis,
+        natal: payload.natal,
+      };
+      const updated = await request('PUT', `/${payload.id}`, {
+        ...content,
+        analysis: 'Nova revisão.',
+        revision: 1,
+      });
+      expect(updated.json()).toMatchObject({ revision: 2, report: null });
+      expect(calculate).toHaveBeenCalledOnce();
+      expect((await request('PUT', `/${payload.id}`, { ...content, revision: 1 })).statusCode).toBe(
+        409,
+      );
+      expect((await request('POST', `/${payload.id}/publish`, body)).statusCode).toBe(409);
+      expect(await database.db.select().from(documents)).toHaveLength(3);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('keeps failures private, rejects inactive recipients and does not resurrect deleted documents', async () => {
+    vi.spyOn(helenaEngine, 'calculateHelenaNatal').mockResolvedValue(natalFixture as never);
+    const app = await buildTestApp();
+    const headers = { authorization: `Bearer ${await tokenFor(ids.admin, 'aal2')}` };
+    const payload = savedInput();
+    try {
+      await app.inject({ method: 'POST', url: '/admin/helena/charts', headers, payload });
+      uploadReport.mockResolvedValueOnce({
+        data: null,
+        error: { message: 'private storage details' },
+      });
+      const failed = await app.inject({
+        method: 'POST',
+        url: `/admin/helena/charts/${payload.id}/preview`,
+        headers,
+        payload: { revision: 1 },
+      });
+      expect(failed.statusCode).toBe(502);
+      expect(JSON.stringify(failed.json())).not.toContain('private storage details');
+      expect(await database.db.select().from(helenaReports)).toHaveLength(0);
+      const preview = await app.inject({
+        method: 'POST',
+        url: `/admin/helena/charts/${payload.id}/preview`,
+        headers,
+        payload: { revision: 1 },
+      });
+      const publishPayload = { revision: 1, reportId: preview.json().reportId };
+      await database.db
+        .update(profiles)
+        .set({ status: 'disabled' })
+        .where(eq(profiles.id, ids.clientA));
+      const inactive = await app.inject({
+        method: 'POST',
+        url: `/admin/helena/charts/${payload.id}/publish`,
+        headers,
+        payload: publishPayload,
+      });
+      expect(inactive.statusCode).toBe(409);
+      await database.db
+        .update(profiles)
+        .set({ status: 'active' })
+        .where(eq(profiles.id, ids.clientA));
+      const published = await app.inject({
+        method: 'POST',
+        url: `/admin/helena/charts/${payload.id}/publish`,
+        headers,
+        payload: publishPayload,
+      });
+      expect(published.statusCode).toBe(200);
+      await app.inject({
+        method: 'DELETE',
+        url: `/admin/documents/${published.json().documentId}`,
+        headers,
+      });
+      const retry = await app.inject({
+        method: 'POST',
+        url: `/admin/helena/charts/${payload.id}/publish`,
+        headers,
+        payload: publishPayload,
+      });
+      expect(retry.statusCode).toBe(410);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('denies every saved-map operation to clients and admins without MFA', async () => {
+    const app = await buildTestApp();
+    try {
+      for (const [subject, aal] of [
+        [ids.clientA, 'aal2'],
+        [ids.admin, 'aal1'],
+      ] as const) {
+        const headers = { authorization: `Bearer ${await tokenFor(subject, aal)}` };
+        for (const [method, suffix, payload] of [
+          ['GET', '', undefined],
+          ['POST', '', savedInput()],
+          ['GET', `/${savedInput().id}`, undefined],
+          ['PUT', `/${savedInput().id}`, {}],
+          ['POST', `/${savedInput().id}/preview`, { revision: 1 }],
+          ['POST', `/${savedInput().id}/publish`, { revision: 1, reportId: savedInput().id }],
+        ] as const) {
+          expect(
+            (
+              await app.inject({
+                method,
+                url: `/admin/helena/charts${suffix}`,
+                headers,
+                ...(payload ? { payload } : {}),
+              })
+            ).statusCode,
+          ).toBe(403);
+        }
+      }
+    } finally {
+      await app.close();
+    }
   });
 
   it('enforces anonymous, client, admin aal1 and admin aal2 authorization', async () => {
