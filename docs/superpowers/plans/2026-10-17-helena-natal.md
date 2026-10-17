@@ -78,6 +78,20 @@ autorizado; função `calculateHelenaNatal(services, input)` retorna `HelenaNata
 
 - [x] Documentar segredo/URL somente no servidor e serviço interno opcional, sem porta pública.
 - [x] Registrar configuração, limites numéricos, instalação, rollback e pendências de paridade.
-- [ ] Executar formatação, lint, arquitetura, tipos, testes, build, Python e E2E relevantes.
+- [x] Executar formatação, lint, arquitetura, tipos, testes, build, Python e E2E relevantes.
 - [x] Revisão independente do diff completo; corrigir achados importantes com teste de regressão.
-- [ ] Abrir PR ligado à #49 com validação real e limites; manter sem merge/deploy.
+- [x] Abrir PR ligado à #49 com validação real e limites; manter sem merge/deploy.
+
+## Evidência de execução
+
+PR [#50](https://github.com/danilomoreiraai/juliana-manduca/pull/50), em rascunho.
+Os jobs `quality`, `e2e`, `mutation` e `commits` passaram na CI da primeira implementação;
+isso inclui PostgreSQL/JWT, cobertura, lint, tipos, build e a suíte Playwright completa.
+O job Python passou e a ponte HTTP real também passou após usar tolerância numérica de
+1e-7 para as diferenças de ponto flutuante entre wheels Windows/Linux. Metadados e entradas
+continuam com comparação exata. Consultar o PR para o estado dos checks do último commit.
+
+A revisão independente não deixou achados importantes pendentes. O erro de mensagem 5xx foi
+corrigido com regressão RED/GREEN. Screenshots em 375 px e 1440 px foram inspecionadas, e os
+seis cenários HELENA passaram com Axe e validação do JSON baixado. Testes usam somente fixtures
+sintéticas. Não foi feito merge ou deploy.

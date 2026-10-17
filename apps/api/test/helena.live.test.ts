@@ -62,7 +62,10 @@ it.skipIf(!process.env.HELENA_TEST_PYTHON)(
           latitude: expect.closeTo(body.latitude, 7),
           speed: expect.closeTo(body.speed, 7),
         })),
-        aspects: fixture.aspects.map((aspect) => ({ ...aspect, orb: expect.closeTo(aspect.orb, 7) })),
+        aspects: fixture.aspects.map((aspect) => ({
+          ...aspect,
+          orb: expect.closeTo(aspect.orb, 7),
+        })),
       });
     } finally {
       lines.close();
