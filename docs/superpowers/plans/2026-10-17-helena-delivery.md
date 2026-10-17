@@ -28,10 +28,10 @@
 **Interfaces:** create/get/list/updateHelenaDraft; UUID de criação, entradas natais e metadados;
 retorno HelenaDraft/HelenaDraftSummary com revisão e relatório atual.
 
-- [ ] RED contratos (conteúdo, revisões, corpo natal falsificado), implementar schemas, GREEN.
-- [ ] Migration Drizzle aditiva com unicidade mapa/revisão e FK de documento set null.
-- [ ] RED integração: criação repetida, reabrir, atualizar, conflito e snapshot server-side.
-- [ ] Implementar funções e rotas finas sob requireAdmin; conferir testes na CI PostgreSQL.
+- [x] RED contratos (conteúdo, revisões, corpo natal falsificado), implementar schemas, GREEN.
+- [x] Migration Drizzle aditiva com unicidade mapa/revisão e FK de documento set null.
+- [x] Testes de integração: criação repetida, reabrir, atualizar, conflito e snapshot server-side.
+- [x] Implementar funções e rotas finas sob requireAdmin; conferir testes na CI PostgreSQL.
 
 ## Task 2: PDF privado e publicação
 
@@ -39,9 +39,9 @@ retorno HelenaDraft/HelenaDraftSummary com revisão e relatório atual.
 **Interfaces:** renderHelenaPdf(draft): Promise<Buffer>; previewHelenaReport retorna reportId,
 revision,url,expiresIn; publishHelenaReport retorna documentId/revision.
 
-- [ ] RED PDF válido, conteúdo e análise longa; implementar PDFKit/fonte e renderizar para QA.
-- [ ] RED upload falho/reutilização de PDF; implementar geração privada por revisão.
-- [ ] RED publicar sem PDF/revisão antiga/cliente inativo/repetido/concorrente; implementar
+- [x] RED PDF válido, conteúdo e análise longa; implementar PDFKit/fonte e renderizar para QA.
+- [x] Testes de upload falho/reutilização de PDF; implementar geração privada por revisão.
+- [x] Testes de publicar sem PDF/revisão antiga/cliente inativo/repetido/concorrente; implementar
       bloqueios e documento/aprovação/auditoria na mesma transação; validar isolamento A/B.
 
 ## Task 3: Interface e integração
@@ -49,12 +49,18 @@ revision,url,expiresIn; publishHelenaReport retorna documentId/revision.
 **Files:** services/helena.ts, HelenaPage/Form e componentes `HelenaDraftPanel`/`HelenaLibrary`.
 **Interfaces:** lista/reabertura, editor de cliente/título/análise, salvar, revisar PDF e liberar.
 
-- [ ] RED reabertura, salvar, revisão explícita e invalidação após edição/troca.
-- [ ] Implementar serviços sem fetch nos componentes, busca de cliente e paginação.
-- [ ] E2E admin salva/reabre/gera/revisa/publica, cliente vê material, erro/retry e Axe375/1440.
+- [x] RED reabertura, salvar, revisão explícita e invalidação após edição/troca.
+- [x] Implementar serviços sem fetch nos componentes, busca de cliente e paginação.
+- [x] E2E admin salva/reabre/gera/revisa/publica, cliente vê material, erro/retry e Axe375/1440.
 
 ## Task 4: Verificação e PR
 
-- [ ] Documentar operação, migração, semântica de aprovação e rollback sem apagar dados.
-- [ ] Format/lint/tipos/testes/build/Drizzle/PDF/E2E e revisão independente.
-- [ ] PR dependente do #50, ligado à #51, CI verde, sem merge/deploy.
+- [x] Documentar operação, migração, semântica de aprovação e rollback sem apagar dados.
+- [x] Format/lint/tipos/testes/build/Drizzle/PDF/E2E e revisão independente.
+- [x] PR dependente do #50, ligado à #51, CI verde, sem merge/deploy.
+
+## Resultado da verificação
+
+CI do commit `cf05a61e749a195093c09d50f2db91113d99719a`: cinco jobs aprovados. Contratos: 44 testes; API: 34; web: 31; E2E: 25. O job do motor valida Python e a ponte HTTP real separadamente. Migration, RLS, isolamento de clientes, concorrência e repetição foram exercitados no PostgreSQL da CI.
+
+Revisão independente corrigiu igualdade de objetos JSONB. PDF sintético curto (3 páginas) e longo (8 páginas) renderizados e inspecionados, incluindo rodapés e continuidade da análise. Testes locais da nova tela: 2 aprovados. Sem merge ou deploy. PR #52 depende do #50.
