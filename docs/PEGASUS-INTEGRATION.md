@@ -30,18 +30,18 @@ de conteúdo do admin; sua presença no motor não concede ao cliente acesso a c
 As capacidades abaixo foram verificadas no código da revisão indicada. Isso não equivale a executar
 os testes ou comprovar a implantação real nesta entrega documental.
 
-| Capacidade | Implementação existente | Consequência para a integração |
-| --- | --- | --- |
-| Frontend | React 19, Vite, Tailwind v4 e React Router em `apps/web` | Adicionar a ferramenta à área administrativa do próprio site |
-| Integração de telas | `apps/web/src/services/portal.ts` e TanStack Query | Novas chamadas ficam em services; componentes não acessam infraestrutura |
-| Login e MFA | Supabase Auth, `AdminRoute` e `apps/api/src/plugins/auth.ts` | Reutilizar identidade, papel no banco e exigência de `aal2` |
-| API | Fastify, rotas finas e `src/functions` | Acrescentar funções de astrologia à API existente |
-| Contratos | `packages/contracts/src/index.ts`, Zod e TypeScript | Definir schemas e tipos compartilhados neste pacote |
-| Dados | Drizzle e schema privado `app` | Novas tabelas por migrations incrementais |
-| Entrega de materiais | `documents`, bucket privado e downloads assinados por 300 segundos | Publicar o PDF como documento para `userId` e consulta opcional |
-| Área do cliente | `apps/web/src/pages/DashboardPage.tsx` | O material publicado aparece na seção de arquivos já existente |
-| Auditoria | `app.audit_events` e funções de documentos | Registrar cálculo, revisão, publicação e retirada sem corpos sensíveis |
-| Operação | Docker Compose/EasyPanel e CI existente | Adicionar componentes de cálculo por entregas reversíveis |
+| Capacidade           | Implementação existente                                            | Consequência para a integração                                           |
+| -------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| Frontend             | React 19, Vite, Tailwind v4 e React Router em `apps/web`           | Adicionar a ferramenta à área administrativa do próprio site             |
+| Integração de telas  | `apps/web/src/services/portal.ts` e TanStack Query                 | Novas chamadas ficam em services; componentes não acessam infraestrutura |
+| Login e MFA          | Supabase Auth, `AdminRoute` e `apps/api/src/plugins/auth.ts`       | Reutilizar identidade, papel no banco e exigência de `aal2`              |
+| API                  | Fastify, rotas finas e `src/functions`                             | Acrescentar funções de astrologia à API existente                        |
+| Contratos            | `packages/contracts/src/index.ts`, Zod e TypeScript                | Definir schemas e tipos compartilhados neste pacote                      |
+| Dados                | Drizzle e schema privado `app`                                     | Novas tabelas por migrations incrementais                                |
+| Entrega de materiais | `documents`, bucket privado e downloads assinados por 300 segundos | Publicar o PDF como documento para `userId` e consulta opcional          |
+| Área do cliente      | `apps/web/src/pages/DashboardPage.tsx`                             | O material publicado aparece na seção de arquivos já existente           |
+| Auditoria            | `app.audit_events` e funções de documentos                         | Registrar cálculo, revisão, publicação e retirada sem corpos sensíveis   |
+| Operação             | Docker Compose/EasyPanel e CI existente                            | Adicionar componentes de cálculo por entregas reversíveis                |
 
 Os contratos atuais de perfil não possuem dados de nascimento. Esses dados precisarão de modelo
 próprio, separado do perfil de autenticação. A função atual `uploadDocument` recebe arquivo
@@ -84,14 +84,14 @@ o serviço executor não se torna seu destinatário ou proprietário editorial.
 
 ## Permissões e destinatários
 
-| Operação | Admin com `aal2` | Admin com `aal1` | Cliente |
-| --- | --- | --- | --- |
-| Cadastrar dados de nascimento e sujeitos dos mapas | Permitido | Negado | Negado |
-| Calcular, importar legado e consultar resultados internos | Permitido | Negado | Negado |
-| Criar, editar e revisar conteúdo | Permitido | Negado | Negado |
-| Publicar ou retirar uma entrega | Permitido | Negado | Negado |
-| Ler rascunhos e notas técnicas internas | Permitido | Negado | Negado |
-| Listar/baixar material liberado para si | Conforme rotas existentes | Conforme rotas existentes | Apenas próprio material |
+| Operação                                                  | Admin com `aal2`          | Admin com `aal1`          | Cliente                 |
+| --------------------------------------------------------- | ------------------------- | ------------------------- | ----------------------- |
+| Cadastrar dados de nascimento e sujeitos dos mapas        | Permitido                 | Negado                    | Negado                  |
+| Calcular, importar legado e consultar resultados internos | Permitido                 | Negado                    | Negado                  |
+| Criar, editar e revisar conteúdo                          | Permitido                 | Negado                    | Negado                  |
+| Publicar ou retirar uma entrega                           | Permitido                 | Negado                    | Negado                  |
+| Ler rascunhos e notas técnicas internas                   | Permitido                 | Negado                    | Negado                  |
+| Listar/baixar material liberado para si                   | Conforme rotas existentes | Conforme rotas existentes | Apenas próprio material |
 
 Reutilizar `app.requireAdmin` em todas as rotas da ferramenta e os guards existentes no frontend.
 Os grants e a arquitetura atuais mantêm dados de negócio na API; não acrescentar acesso direto
@@ -111,13 +111,13 @@ no material entregue quando o admin os inclui e revisa expressamente.
 
 As tabelas abaixo são propostas. Nenhuma migration ou coluna correspondente é criada neste PR.
 
-| Tabela no schema `app` | Responsabilidade |
-| --- | --- |
-| `astrology_subjects` | Dados de nascimento e local, calendário, modo de fuso e precisão/conhecimento da hora; vínculo opcional com cliente |
-| `astrology_calculations` | Técnica, sujeitos e entradas congeladas, versão do motor, configuração, resultado e autor |
-| `astrology_jobs` | Estado persistente, prazo de posse, tentativas e referência da versão de entrada |
-| `astrology_report_versions` | Conteúdo editorial e seleção de resultados, número da versão, revisão e autor |
-| `astrology_publications` | Relação da versão revisada com destinatário, consulta, `documentId` e estado da entrega |
+| Tabela no schema `app`      | Responsabilidade                                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `astrology_subjects`        | Dados de nascimento e local, calendário, modo de fuso e precisão/conhecimento da hora; vínculo opcional com cliente |
+| `astrology_calculations`    | Técnica, sujeitos e entradas congeladas, versão do motor, configuração, resultado e autor                           |
+| `astrology_jobs`            | Estado persistente, prazo de posse, tentativas e referência da versão de entrada                                    |
+| `astrology_report_versions` | Conteúdo editorial e seleção de resultados, número da versão, revisão e autor                                       |
+| `astrology_publications`    | Relação da versão revisada com destinatário, consulta, `documentId` e estado da entrega                             |
 
 Reutilizar `profiles`, `consultations`, `documents` e `audit_events`, sem duplicá-los. Cada mapa/relatório
 referencia snapshots de suas entradas; editar dados de nascimento não altera retroativamente um
@@ -170,19 +170,19 @@ continuarão usando seu fluxo atual.
 
 ## Pontos de integração e contratos propostos
 
-| Arquivo/área | Adequação futura |
-| --- | --- |
-| `apps/web/src/App.tsx` | Rota `/admin/astrologia` dentro dos mesmos guards administrativos |
-| `apps/web/src/components/DashboardShell.tsx` | Entrada “Astrologia” no menu administrativo |
-| `apps/web/src/pages/AdminPage.tsx` | Atalho preservando cliente/consulta selecionados |
-| `apps/web/src/services/astrology.ts` (novo) | Cliente HTTP tipado para cálculos e relatórios |
-| `apps/api/src/routes/astrology.ts` (novo) | Controllers administrativos finos com `requireAdmin` |
-| `apps/api/src/functions/astrology/` (novo) | Casos de uso de cálculo, conteúdo, revisão e publicação |
-| `apps/api/src/functions/documents.ts` | Persistência comum para upload e material gerado, mantendo autorização |
-| `apps/api/src/db/schema.ts` e `apps/api/drizzle/` | Tabelas e migrations aditivas para domínio astrológico |
-| `packages/contracts/src/astrology.ts` (novo) | Schemas Zod, estados e tipos exportados pelo índice atual |
-| `apps/web/src/services/demo.ts` | Fixtures sintéticas para os novos fluxos no modo demo existente |
-| `compose.yaml` e `docs/DEPLOYMENT.md` | Worker e identidade interna quando houver cálculo homologado |
+| Arquivo/área                                      | Adequação futura                                                       |
+| ------------------------------------------------- | ---------------------------------------------------------------------- |
+| `apps/web/src/App.tsx`                            | Rota `/admin/astrologia` dentro dos mesmos guards administrativos      |
+| `apps/web/src/components/DashboardShell.tsx`      | Entrada “Astrologia” no menu administrativo                            |
+| `apps/web/src/pages/AdminPage.tsx`                | Atalho preservando cliente/consulta selecionados                       |
+| `apps/web/src/services/astrology.ts` (novo)       | Cliente HTTP tipado para cálculos e relatórios                         |
+| `apps/api/src/routes/astrology.ts` (novo)         | Controllers administrativos finos com `requireAdmin`                   |
+| `apps/api/src/functions/astrology/` (novo)        | Casos de uso de cálculo, conteúdo, revisão e publicação                |
+| `apps/api/src/functions/documents.ts`             | Persistência comum para upload e material gerado, mantendo autorização |
+| `apps/api/src/db/schema.ts` e `apps/api/drizzle/` | Tabelas e migrations aditivas para domínio astrológico                 |
+| `packages/contracts/src/astrology.ts` (novo)      | Schemas Zod, estados e tipos exportados pelo índice atual              |
+| `apps/web/src/services/demo.ts`                   | Fixtures sintéticas para os novos fluxos no modo demo existente        |
+| `compose.yaml` e `docs/DEPLOYMENT.md`             | Worker e identidade interna quando houver cálculo homologado           |
 
 Rotas futuras sugeridas, todas sob `requireAdmin`: `/admin/astrology/subjects`,
 `/admin/astrology/calculations`, `/admin/astrology/calculations/:id` e
@@ -203,14 +203,14 @@ o conteúdo revisado. Exportações de investigação/importação serão funç�
 
 Cada entrega segue issue própria, branch `codex/*`, PR, CI e revisão, conforme [AGENTS.md](../AGENTS.md).
 
-| Entrega | Conteúdo | Aceite observável |
-| --- | --- | --- |
-| Adequação atual | Arquitetura e matriz nesta issue | Pontos existentes mapeados, funções futuras identificadas e fluxo do admin definido |
-| Fundação numérica | Contratos de tempo, motor e comparador | Saídas medidas contra casos sintéticos do Pegasus; diferenças e tolerâncias documentadas |
-| Primeiro fluxo completo | Mapa natal, rascunho, revisão e PDF no portal | Admin AAL2 gera/revisa/publica; só o cliente selecionado lista e baixa |
-| Migração e complementos | Paradox, históricos, harmônicas, pontos e editor | Reconciliação de dados e comparação por técnica, sem expor notas internas |
-| Técnicas avançadas | Relacionamentos, revoluções, direções, trânsitos e mundial | Variantes ativas comparadas com o original e disponíveis ao admin |
-| Especializados e fechamento | Retificação, Local Space, pontos sensíveis e tabelas | Regras recuperadas, paridade demonstrada e matriz de funções ativas concluída |
+| Entrega                     | Conteúdo                                                   | Aceite observável                                                                        |
+| --------------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Adequação atual             | Arquitetura e matriz nesta issue                           | Pontos existentes mapeados, funções futuras identificadas e fluxo do admin definido      |
+| Fundação numérica           | Contratos de tempo, motor e comparador                     | Saídas medidas contra casos sintéticos do Pegasus; diferenças e tolerâncias documentadas |
+| Primeiro fluxo completo     | Mapa natal, rascunho, revisão e PDF no portal              | Admin AAL2 gera/revisa/publica; só o cliente selecionado lista e baixa                   |
+| Migração e complementos     | Paradox, históricos, harmônicas, pontos e editor           | Reconciliação de dados e comparação por técnica, sem expor notas internas                |
+| Técnicas avançadas          | Relacionamentos, revoluções, direções, trânsitos e mundial | Variantes ativas comparadas com o original e disponíveis ao admin                        |
+| Especializados e fechamento | Retificação, Local Space, pontos sensíveis e tabelas       | Regras recuperadas, paridade demonstrada e matriz de funções ativas concluída            |
 
 O primeiro fluxo completo deverá usar apenas capacidades homologadas. Nenhuma tela em modo demo
 ou resultado aproximado autoriza marcar a reconstrução completa como concluída. Itens como Hindu,
