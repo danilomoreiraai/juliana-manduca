@@ -49,7 +49,21 @@ it.skipIf(!process.env.HELENA_TEST_PYTHON)(
       );
       expect(result.julianDayUt).toBe(2451545);
       expect(result.bodies[0]?.longitude).toBeCloseTo(280.3689, 3);
-      expect(result).toEqual(fixture);
+      // Compiled Swiss Ephemeris wheels differ at the last floating-point digits
+      // across Windows/Linux. Keep metadata exact and numerical tolerance at 1e-7.
+      expect(result).toEqual({
+        ...fixture,
+        ascendant: expect.closeTo(fixture.ascendant, 7),
+        midheaven: expect.closeTo(fixture.midheaven, 7),
+        houses: fixture.houses.map((cusp) => expect.closeTo(cusp, 7)),
+        bodies: fixture.bodies.map((body) => ({
+          ...body,
+          longitude: expect.closeTo(body.longitude, 7),
+          latitude: expect.closeTo(body.latitude, 7),
+          speed: expect.closeTo(body.speed, 7),
+        })),
+        aspects: fixture.aspects.map((aspect) => ({ ...aspect, orb: expect.closeTo(aspect.orb, 7) })),
+      });
     } finally {
       lines.close();
       child.kill();
