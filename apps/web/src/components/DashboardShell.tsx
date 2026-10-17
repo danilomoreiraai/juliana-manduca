@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { CalendarDays, FileText, Home, LogOut, ShieldCheck, Users } from 'lucide-react';
+import { CalendarDays, FileText, Home, LogOut, Orbit, ShieldCheck, Users } from 'lucide-react';
 import type { PropsWithChildren } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -16,6 +16,7 @@ export const DashboardShell = ({
   const links: Array<[LucideIcon, string, string]> = admin
     ? [
         [ShieldCheck, 'Visão geral', '/admin'],
+        [Orbit, 'HELENA', '/admin/helena'],
         [Users, 'Clientes', '/admin#clientes'],
         [CalendarDays, 'Consultas', '/admin#consultas'],
         [FileText, 'Arquivos', '/admin#arquivos'],
@@ -31,7 +32,7 @@ export const DashboardShell = ({
   };
   return (
     <div className="dashboard-grid cosmic-bg">
-      <aside className="border-b border-ivory-100/15 bg-ink-900/75 p-5 md:border-b-0 md:border-r md:p-7">
+      <aside className="min-w-0 border-b border-ivory-100/15 bg-ink-900/75 p-5 md:border-b-0 md:border-r md:p-7">
         <Brand />
         <nav className="mt-8 flex gap-2 overflow-auto md:flex-col" aria-label="Área privada">
           {links.map(([Icon, label, href]) => (

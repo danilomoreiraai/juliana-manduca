@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+export type { HelenaBodyId, HelenaNatalInput, HelenaNatalResult } from './helena.js';
+export { helenaBodyIds, helenaNatalInputSchema, helenaNatalResultSchema } from './helena.js';
+
 export const userRoleSchema = z.enum(['client', 'admin']);
 export const profileStatusSchema = z.enum(['invited', 'active', 'disabled']);
 export const consultationStatusSchema = z.enum(['scheduled', 'completed', 'cancelled']);

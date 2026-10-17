@@ -10,6 +10,9 @@ import { AuthProvider } from './context/AuthContext';
 const AdminPage = lazy(() =>
   import('./pages/AdminPage').then((module) => ({ default: module.AdminPage })),
 );
+const HelenaPage = lazy(() =>
+  import('./pages/HelenaPage').then((module) => ({ default: module.HelenaPage })),
+);
 const AuthCallbackPage = lazy(() =>
   import('./pages/AuthCallbackPage').then((module) => ({ default: module.AuthCallbackPage })),
 );
@@ -65,6 +68,7 @@ const AppRoutes = () => {
             <Route element={<ProtectedRoute admin />}>
               <Route element={<AdminRoute />}>
                 <Route path="/admin" element={<AdminPage />} />
+                <Route path="/admin/helena" element={<HelenaPage />} />
               </Route>
             </Route>
             <Route path="*" element={<NotFoundPage />} />

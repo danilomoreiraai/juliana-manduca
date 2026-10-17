@@ -1,0 +1,191 @@
+{
+  "protocol": "helena.natal.v1",
+  "engine": {
+    "name": "Swiss Ephemeris",
+    "version": "2.10.03",
+    "bindingVersion": "2.10.3.6"
+  },
+  "ephemeris": "moshier",
+  "input": {
+    "date": "2000-01-01",
+    "time": "12:00:00",
+    "utcOffsetMinutes": 0,
+    "latitude": -23.5505,
+    "longitude": -46.6333,
+    "houseSystem": "P",
+    "zodiac": "tropical"
+  },
+  "julianDayUt": 2451545.0,
+  "ayanamsa": 0,
+  "ascendant": 327.1443331640211,
+  "midheaven": 236.14158293515192,
+  "bodies": [
+    {
+      "id": "sun",
+      "longitude": 280.36891967534336,
+      "latitude": 0.000232326514176311,
+      "speed": 1.0194320944210782,
+      "retrograde": false,
+      "house": 11
+    },
+    {
+      "id": "moon",
+      "longitude": 223.32377543840954,
+      "latitude": 5.170815468996152,
+      "speed": 12.021182719804214,
+      "retrograde": false,
+      "house": 9
+    },
+    {
+      "id": "mercury",
+      "longitude": 271.8892750074874,
+      "latitude": -0.9948251818699607,
+      "speed": 1.5562540922634527,
+      "retrograde": false,
+      "house": 11
+    },
+    {
+      "id": "venus",
+      "longitude": 241.5657983261687,
+      "latitude": 2.066347990864614,
+      "speed": 1.2090397204249068,
+      "retrograde": false,
+      "house": 10
+    },
+    {
+      "id": "mars",
+      "longitude": 327.9633133185202,
+      "latitude": -1.067782948274341,
+      "speed": 0.7756727772750058,
+      "retrograde": false,
+      "house": 1
+    },
+    {
+      "id": "jupiter",
+      "longitude": 25.25303030942177,
+      "latitude": -1.2621728355212258,
+      "speed": 0.04076131765140367,
+      "retrograde": false,
+      "house": 3
+    },
+    {
+      "id": "saturn",
+      "longitude": 40.39563895600193,
+      "latitude": -2.4448225546192166,
+      "speed": -0.01994475935472004,
+      "retrograde": true,
+      "house": 3
+    },
+    {
+      "id": "uranus",
+      "longitude": 314.8092231658263,
+      "latitude": -0.6583328776085637,
+      "speed": 0.05034355441128553,
+      "retrograde": false,
+      "house": 12
+    },
+    {
+      "id": "neptune",
+      "longitude": 303.19298122364415,
+      "latitude": 0.23499118275176933,
+      "speed": 0.03557012441920768,
+      "retrograde": false,
+      "house": 12
+    },
+    {
+      "id": "pluto",
+      "longitude": 251.45470884674668,
+      "latitude": 10.855202461622806,
+      "speed": 0.03515289524029843,
+      "retrograde": false,
+      "house": 10
+    }
+  ],
+  "houses": [
+    327.1443331640211, 354.0239177648323, 24.23879739640334, 56.141582935151916, 87.66081022286204,
+    118.0029398232868, 147.14433316402108, 174.02391776483228, 204.23879739640333,
+    236.14158293515192, 267.66081022286204, 298.0029398232868
+  ],
+  "aspects": [
+    {
+      "bodyA": "sun",
+      "bodyB": "moon",
+      "type": "sextile",
+      "angle": 60,
+      "orb": 2.9548557630661776,
+      "phase": "separating"
+    },
+    {
+      "bodyA": "sun",
+      "bodyB": "saturn",
+      "type": "trine",
+      "angle": 120,
+      "orb": 0.0267192806585399,
+      "phase": "applying"
+    },
+    {
+      "bodyA": "moon",
+      "bodyB": "saturn",
+      "type": "opposition",
+      "angle": 180,
+      "orb": 2.928136482407581,
+      "phase": "separating"
+    },
+    {
+      "bodyA": "moon",
+      "bodyB": "uranus",
+      "type": "square",
+      "angle": 90,
+      "orb": 1.4854477274167834,
+      "phase": "applying"
+    },
+    {
+      "bodyA": "mercury",
+      "bodyB": "mars",
+      "type": "sextile",
+      "angle": 60,
+      "orb": 3.92596168896722,
+      "phase": "separating"
+    },
+    {
+      "bodyA": "venus",
+      "bodyB": "mars",
+      "type": "square",
+      "angle": 90,
+      "orb": 3.602485007648511,
+      "phase": "separating"
+    },
+    {
+      "bodyA": "venus",
+      "bodyB": "neptune",
+      "type": "sextile",
+      "angle": 60,
+      "orb": 1.6271828974754499,
+      "phase": "applying"
+    },
+    {
+      "bodyA": "mars",
+      "bodyB": "jupiter",
+      "type": "sextile",
+      "angle": 60,
+      "orb": 2.7102830090984185,
+      "phase": "separating"
+    },
+    {
+      "bodyA": "saturn",
+      "bodyB": "uranus",
+      "type": "square",
+      "angle": 90,
+      "orb": 4.413584209824421,
+      "phase": "separating"
+    },
+    {
+      "bodyA": "uranus",
+      "bodyB": "pluto",
+      "type": "sextile",
+      "angle": 60,
+      "orb": 3.354514319079641,
+      "phase": "separating"
+    }
+  ]
+}

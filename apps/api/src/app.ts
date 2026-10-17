@@ -5,6 +5,7 @@ import rateLimit from '@fastify/rate-limit';
 import sensible from '@fastify/sensible';
 import Fastify, { type FastifyError, LogController } from 'fastify';
 import { AppError } from './lib/errors.js';
+import { HelenaEngineError } from './lib/helena-error.js';
 import {
   activeTraceId,
   captureServerError,
@@ -18,6 +19,7 @@ import { adminRoutes } from './routes/admin.js';
 import { consultationRoutes } from './routes/consultations.js';
 import { documentRoutes } from './routes/documents.js';
 import { healthRoutes } from './routes/health.js';
+import { helenaRoutes } from './routes/helena.js';
 import { meRoutes } from './routes/me.js';
 import type { AppServices } from './types.js';
 
@@ -93,7 +95,10 @@ export const buildApp = async (services: AppServices) => {
   );
   app.setErrorHandler((error: FastifyError, request, reply) => {
     const statusCode = error instanceof AppError ? error.statusCode : (error.statusCode ?? 500);
-    const message = statusCode >= 500 ? 'Erro interno do servidor' : error.message;
+    const message =
+      statusCode >= 500 && !(error instanceof HelenaEngineError)
+        ? 'Erro interno do servidor'
+        : error.message;
     if (statusCode >= 500) {
       request.log.error(
         { err: safeErrorForLog(error), traceId: activeTraceId() },
@@ -109,6 +114,7 @@ export const buildApp = async (services: AppServices) => {
   await app.register(consultationRoutes, { prefix: '/consultations' });
   await app.register(documentRoutes, { prefix: '/documents' });
   await app.register(adminRoutes, { prefix: '/admin' });
+  await app.register(helenaRoutes, { prefix: '/admin/helena' });
 
   return app;
 };
