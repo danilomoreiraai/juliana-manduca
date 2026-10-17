@@ -8,6 +8,7 @@ MVP institucional e portal privado para clientes de Juliana Manduca. Esta é uma
 - autenticação Supabase apenas por convite, recuperação de senha e MFA TOTP para admin;
 - dashboard do cliente com consultas, materiais privados e perfil;
 - dashboard administrativo para clientes, consultas e arquivos;
+- HELENA: ferramenta administrativa de mapa natal, mandala, posições, casas, aspectos e exportação JSON ([operação e limites](docs/HELENA.md));
 - API Fastify com validação Zod, Drizzle ORM, auditoria e autorização server-side;
 - Supabase PostgreSQL em schema privado e Storage com bucket privado;
 - Vitest, Testing Library, Playwright, GitHub Actions, Sentry, logs JSON e Uptime Kuma;
@@ -21,6 +22,7 @@ Não fazem parte deste MVP: Desenho Humano nativo, pagamentos, agenda automátic
 apps/web             React 19 + Vite + TailwindCSS v4
 apps/api             Fastify + Drizzle + PostgreSQL
 packages/contracts   schemas Zod e tipos compartilhados
+services/astrology   motor natal HELENA (Python, serviço interno opcional)
 docs                  implantação e operação
 ```
 

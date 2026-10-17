@@ -13,6 +13,19 @@ services:
       timeout: 5s
       retries: 3
 
+  helena-engine:
+    profiles: ['helena']
+    build: ./services/astrology
+    restart: unless-stopped
+    environment:
+      HELENA_ENGINE_TOKEN: ${HELENA_ENGINE_TOKEN:-}
+      PYTHONDONTWRITEBYTECODE: '1'
+    expose:
+      - '8000'
+    read_only: true
+    cap_drop: ['ALL']
+    security_opt: ['no-new-privileges:true']
+
   web:
     build:
       context: .

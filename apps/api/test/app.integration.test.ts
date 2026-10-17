@@ -225,6 +225,48 @@ integration('API with isolated PostgreSQL and Supabase-compatible auth', () => {
     await app.close();
   });
 
+  it('restricts HELENA to active admins with AAL2 before invoking the engine', async () => {
+    const app = await buildTestApp();
+    const payload = {
+      date: '2000-01-01',
+      time: '12:00:00',
+      utcOffsetMinutes: 0,
+      latitude: -23.5505,
+      longitude: -46.6333,
+      houseSystem: 'P',
+      zodiac: 'tropical',
+    };
+    try {
+      const anonymous = await app.inject({ method: 'POST', url: '/admin/helena/natal', payload });
+      expect(anonymous.statusCode).toBe(401);
+      for (const [subject, aal, status] of [
+        [ids.clientA, 'aal2', 403],
+        [ids.disabled, 'aal2', 403],
+        [ids.admin, 'aal1', 403],
+        [ids.admin, 'aal2', 503],
+      ] as const) {
+        const token = await tokenFor(subject, aal);
+        const response = await app.inject({
+          method: 'POST',
+          url: '/admin/helena/natal',
+          payload,
+          headers: { authorization: `Bearer ${token}` },
+        });
+        expect(response.statusCode).toBe(status);
+      }
+      const token = await tokenFor(ids.admin, 'aal2');
+      const invalid = await app.inject({
+        method: 'POST',
+        url: '/admin/helena/natal',
+        payload: {},
+        headers: { authorization: `Bearer ${token}` },
+      });
+      expect(invalid.statusCode).toBe(400);
+    } finally {
+      await app.close();
+    }
+  });
+
   it('rejects expired sessions and disabled profiles', async () => {
     const app = await buildTestApp();
     const expired = await tokenFor(ids.clientA, 'aal1', '-1s');

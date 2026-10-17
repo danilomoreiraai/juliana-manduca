@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { buildApp } from '../src/app.js';
 import { parseEnv } from '../src/env.js';
 import { AppError } from '../src/lib/errors.js';
+import { calculateHelenaNatal } from '../src/functions/helena.js';
+import { helenaNatalInputSchema } from '@juliana/contracts';
 
 const env = parseEnv({
   NODE_ENV: 'test',
@@ -16,6 +18,41 @@ const env = parseEnv({
 });
 
 describe('api app', () => {
+  it('preserves safe HELENA unavailability messages but masks unexpected server errors', async () => {
+    const services = { env, db: {} as never, supabase: { admin: {} } as never };
+    const app = await buildApp(services);
+    await app.register(async (scope) => {
+      scope.post('/engine-error', async () =>
+        calculateHelenaNatal(
+          services,
+          helenaNatalInputSchema.parse({
+            date: '2000-01-01',
+            time: '12:00',
+            utcOffsetMinutes: 0,
+            latitude: 0,
+            longitude: 0,
+            houseSystem: 'E',
+            zodiac: 'tropical',
+          }),
+        ),
+      );
+      scope.get('/private-error', async () => {
+        throw new Error('private internal secret');
+      });
+    });
+    try {
+      const response = await app.inject({ method: 'POST', url: '/engine-error' });
+      expect(response.statusCode).toBe(503);
+      expect(response.json()).toEqual({
+        message: 'O motor da HELENA ainda não está configurado neste ambiente',
+        statusCode: 503,
+      });
+      const privateError = await app.inject({ method: 'GET', url: '/private-error' });
+      expect(privateError.json()).toEqual({ message: 'Erro interno do servidor', statusCode: 500 });
+    } finally {
+      await app.close();
+    }
+  });
   it('exposes liveness without external dependencies', async () => {
     const app = await buildApp({ env, db: {} as never, supabase: { admin: {} } as never });
     const response = await app.inject({ method: 'GET', url: '/health/live' });
