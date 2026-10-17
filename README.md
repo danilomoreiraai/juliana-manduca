@@ -26,6 +26,12 @@ docs                  implantação e operação
 
 ## Fluxo de contribuição e deploy
 
+A integração do Pegasus Photon SE está proposta como ferramenta do administrador para calcular,
+preparar, revisar e disponibilizar conteúdos nos materiais privados dos clientes. A
+[arquitetura de integração](docs/PEGASUS-INTEGRATION.md) e a
+[matriz funcional](docs/pegasus/FEATURE-MATRIX.md) documentam o escopo; os módulos astrológicos ainda
+não estão implementados.
+
 Todo trabalho material segue **issue → branch `codex/*` → PR → CI/revisão → merge → deploy**. Push direto na `main` não é permitido. A descrição do PR deve vincular a issue com `Closes #N` ou `Refs #N` e registrar validação, observabilidade, deploy e rollback.
 
 Agentes e automações devem ler [AGENTS.md](AGENTS.md) antes de alterar o projeto. Os templates em `.github/` formalizam esse padrão para issues e PRs.
