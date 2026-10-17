@@ -6,6 +6,8 @@ import { HelenaPage } from '../pages/HelenaPage';
 import { calculateNatal } from '../services/helena';
 
 vi.mock('../services/helena', () => ({ calculateNatal: vi.fn() }));
+vi.mock('../components/helena/HelenaDraftPanel', () => ({ HelenaDraftPanel: () => null }));
+vi.mock('../components/helena/HelenaLibrary', () => ({ HelenaLibrary: () => null }));
 vi.mock('../components/DashboardShell', () => ({
   DashboardShell: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));

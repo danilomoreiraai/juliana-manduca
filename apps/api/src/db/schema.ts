@@ -1,10 +1,13 @@
+import type { HelenaNatalResult } from '@juliana/contracts';
 import {
   bigint,
   index,
+  integer,
   jsonb,
   pgSchema,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
@@ -94,4 +97,48 @@ export const auditEvents = appSchema.table(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [index('audit_events_actor_created_idx').on(table.actorId, table.createdAt)],
+);
+
+export const helenaDrafts = appSchema.table(
+  'helena_drafts',
+  {
+    id: uuid('id').primaryKey(),
+    clientId: uuid('client_id')
+      .notNull()
+      .references(() => profiles.id, { onDelete: 'cascade' }),
+    subjectName: varchar('subject_name', { length: 120 }).notNull(),
+    title: varchar('title', { length: 160 }).notNull(),
+    analysis: text('analysis').notNull(),
+    result: jsonb('result').$type<HelenaNatalResult>().notNull(),
+    revision: integer('revision').notNull().default(1),
+    createdBy: uuid('created_by').notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index('helena_drafts_updated_idx').on(table.updatedAt),
+    index('helena_drafts_client_idx').on(table.clientId),
+  ],
+);
+
+export const helenaReports = appSchema.table(
+  'helena_reports',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    draftId: uuid('draft_id')
+      .notNull()
+      .references(() => helenaDrafts.id, { onDelete: 'cascade' }),
+    revision: integer('revision').notNull(),
+    clientId: uuid('client_id')
+      .notNull()
+      .references(() => profiles.id, { onDelete: 'cascade' }),
+    storagePath: text('storage_path').notNull().unique(),
+    sha256: varchar('sha256', { length: 64 }).notNull(),
+    sizeBytes: integer('size_bytes').notNull(),
+    formatVersion: varchar('format_version', { length: 40 }).notNull(),
+    documentId: uuid('document_id').references(() => documents.id, { onDelete: 'set null' }),
+    publishedBy: uuid('published_by'),
+    publishedAt: timestamp('published_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex('helena_reports_draft_revision_idx').on(table.draftId, table.revision)],
 );
