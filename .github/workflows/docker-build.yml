@@ -1,0 +1,97 @@
+name: Docker build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  images:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Check the exported build context with artificial canaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'synthetic-canary\n' > .env.toaa-context-canary
+          printf 'synthetic-canary\n' > apps/api/.env.toaa-context-canary
+          printf 'synthetic-canary\n' > apps/web/toaa-context-canary.key
+          mkdir -p apps/web/node_modules/toaa-context-canary
+          printf 'synthetic-canary\n' > apps/web/node_modules/toaa-context-canary/marker
+          docker buildx build --file - --output "type=local,dest=$RUNNER_TEMP/docker-context" . <<'DOCKERFILE'
+          FROM scratch
+          COPY . /context
+          DOCKERFILE
+          for ignored in \
+            .git \
+            .env.toaa-context-canary \
+            apps/api/.env.toaa-context-canary \
+            apps/web/toaa-context-canary.key \
+            apps/web/node_modules; do
+            test ! -e "$RUNNER_TEMP/docker-context/context/$ignored"
+          done
+          test -f "$RUNNER_TEMP/docker-context/context/package-lock.json"
+          test -f "$RUNNER_TEMP/docker-context/context/apps/api/src/server.ts"
+          test -f "$RUNNER_TEMP/docker-context/context/apps/web/Dockerfile"
+      - name: Build images from the checked-out revision without pushing
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker buildx build --load --file apps/api/Dockerfile \
+            --build-arg "VCS_REF=$GITHUB_SHA" --tag juliana-api:ci .
+          docker buildx build --load --file apps/web/Dockerfile \
+            --build-arg "VCS_REF=$GITHUB_SHA" \
+            --build-arg VITE_API_URL=http://127.0.0.1:3333 \
+            --build-arg VITE_SUPABASE_URL=http://127.0.0.1:54321 \
+            --build-arg VITE_SUPABASE_PUBLISHABLE_KEY=ci-publishable-key \
+            --build-arg "VITE_RELEASE_SHA=$GITHUB_SHA" --tag juliana-web:ci .
+          for image in juliana-api:ci juliana-web:ci; do
+            actual=$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$image")
+            test "$actual" = "$GITHUB_SHA"
+          done
+      - name: Smoke test both images without network access
+        shell: bash
+        run: |
+          set -euo pipefail
+          api="juliana-api-ci-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          web="juliana-web-ci-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          cleanup() { docker rm --force "$api" "$web" >/dev/null 2>&1 || true; }
+          trap cleanup EXIT
+          docker run --detach --name "$api" --network none \
+            --memory 512m --cpus 1 --pids-limit 128 \
+            --env DATABASE_URL=postgresql://ci:ci@127.0.0.1:5432/ci \
+            --env WEB_URL=http://127.0.0.1:5173 \
+            --env CORS_ORIGINS=http://127.0.0.1:5173 \
+            --env SUPABASE_URL=http://127.0.0.1:54321 \
+            --env SUPABASE_PUBLISHABLE_KEY=ci-publishable-key \
+            --env SUPABASE_SECRET_KEY=ci-artificial-secret \
+            juliana-api:ci
+          docker run --detach --name "$web" --network none \
+            --memory 128m --cpus 0.5 --pids-limit 128 juliana-web:ci
+          api_ok=false
+          web_ok=false
+          for attempt in {1..30}; do
+            if docker exec "$api" node -e 'fetch("http://127.0.0.1:3333/health/live").then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))'; then
+              api_ok=true
+            fi
+            if docker exec "$web" wget -qO- http://127.0.0.1/healthz; then
+              web_ok=true
+            fi
+            if "$api_ok" && "$web_ok"; then
+              break
+            fi
+            sleep 1
+          done
+          "$api_ok" && "$web_ok"
