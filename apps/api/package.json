@@ -43,7 +43,7 @@
     "fastify-plugin": "6.0.0",
     "jose": "6.2.9",
     "postgres": "3.4.9",
-    "zod": "4.4.3"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@types/node": "24.10.13",
