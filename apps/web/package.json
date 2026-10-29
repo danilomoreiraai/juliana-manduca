@@ -27,7 +27,7 @@
     "react-hook-form": "7.85.0",
     "react-router-dom": "7.18.2",
     "tailwind-merge": "3.6.0",
-    "zod": "4.4.3"
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.3.3",
@@ -38,7 +38,7 @@
     "@vitejs/plugin-react": "6.0.5",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.3",
-    "vite": "8.2.1",
+    "vite": "8.3.5",
     "vitest": "4.1.12"
   }
 }

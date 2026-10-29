@@ -1,4 +1,4 @@
-FROM node:22-alpine AS builder
+FROM node:22-alpine@sha256:fe4f6d74e20370acb04ad889077d14d0f64a9c8ea6a42bc60cddf1e844699914 AS builder
 WORKDIR /app
 COPY package.json package-lock.json* ./
 COPY apps/api/package.json apps/api/package.json
@@ -26,7 +26,9 @@ ENV VITE_WHATSAPP_NUMBER=$VITE_WHATSAPP_NUMBER
 ENV VITE_INSTAGRAM_URL=$VITE_INSTAGRAM_URL
 RUN npm run build -w @juliana/contracts && npm run build -w @juliana/web
 
-FROM nginx:1.29-alpine AS production
+FROM nginx:1.29-alpine@sha256:5616878291a2eed594aee8db4dade5878cf7edcb475e59193904b198d9b830de AS production
+ARG VCS_REF=unknown
+LABEL org.opencontainers.image.revision=$VCS_REF
 COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
 EXPOSE 80
